@@ -5,6 +5,9 @@ class JSONProtocol(ProtocolBase):
     def encode_response(self, response_dict):
         return json.dumps(response_dict).encode('utf-8')
     
+    def encode_request(self, request_dict):
+        return json.dumps(request_dict).encode('utf-8')
+    
     def decode_request(self, data):
         return json.loads(data.decode('utf-8'))
     

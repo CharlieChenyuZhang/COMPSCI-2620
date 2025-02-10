@@ -3,10 +3,17 @@ import socket
 import bcrypt
 import re
 from threading import Thread
-from enum import IntEnum
 from protocol_json import JSONProtocol
 from protocol_custom import CustomProtocol
 from db_manager import DatabaseManager
+
+try:
+    from config import server_host, server_port
+except ImportError:
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).parent.parent))
+    from config import server_host, server_port
 
 class Actions:
     CREATE = "create"
@@ -19,14 +26,14 @@ class Actions:
     DELETE_ACCOUNT = "delete_account"
 
 class ChatServer:
-    def __init__(self, host='127.0.0.1', port=12345, use_json=True):
+    def __init__(self, host=server_host, port=server_port, use_json=True):
         self.host = host
         self.port = port
         self.protocol = JSONProtocol() if use_json else CustomProtocol()
         self.db = DatabaseManager()
         self.active_connections = {}  # {username: connection}
         self.user_connections = {}    # {connection: username}
-
+        
     def hash_password(self, password):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
@@ -130,8 +137,13 @@ class ChatServer:
 
         # store message in database
         message_id = self.db.store_message(sender, recipient, message)
-        
-        # if recipient is online, send message immediately and mark as read
+        if not message_id:
+            return {
+                'status': 'error',
+                'message': 'Failed to store message'
+            }
+
+        # if recipient is online, send message immediately
         recipient_conn = self.active_connections.get(recipient)
         if recipient_conn:
             try:
@@ -143,9 +155,9 @@ class ChatServer:
                     'timestamp': datetime.now().isoformat()
                 }
                 recipient_conn.sendall(self.protocol.encode_response(notification))
-                self.db.mark_message_read(message_id)
+                # don't mark as read here - let recipient explicitly mark when loaded
             except Exception:
-                pass  # if sending fails, message remains unread
+                pass
 
         return {'status': 'success', 'message_id': message_id}
 
@@ -162,9 +174,10 @@ class ChatServer:
         other_user = data.get('recipient')
 
         if action == Actions.LOAD_UNREAD:
-            # only get unread messages
+            # get unread messages for current user
             messages = self.db.get_messages(username, unread_only=True)
             if messages:
+                # mark messages as read after retrieving them
                 self.db.mark_messages_read(username)
         else:  # LOAD_PAST
             if not other_user:
@@ -177,7 +190,7 @@ class ChatServer:
                     'status': 'error',
                     'message': 'Count required for loading past messages'
                 }
-            # get only read messages between users
+            # get read messages between users
             messages = self.db.get_messages(
                 username, 
                 other_user=other_user, 
@@ -189,7 +202,7 @@ class ChatServer:
             'status': 'success',
             'messages': messages
         }
-                                
+                                                
     def handle_delete_message(self, data, conn):
         username = self.user_connections.get(conn)
         if not username:

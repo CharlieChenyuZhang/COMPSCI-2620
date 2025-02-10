@@ -2,3 +2,5 @@
 test_client/
 __pycache__/
 chat.db
+.pytest_cache/
+chat_server.egg-info/

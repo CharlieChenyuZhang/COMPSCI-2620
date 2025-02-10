@@ -52,7 +52,7 @@ class DatabaseManager:
             cursor = conn.cursor()
             
             if unread_only:
-                # only get unread messages where user is recipient
+                # Get unread messages for recipient
                 query = """
                     SELECT id, sender, content, timestamp 
                     FROM messages 
@@ -73,13 +73,12 @@ class DatabaseManager:
                     base_query += " ORDER BY timestamp DESC"
                     
                     params = (username, other_user, other_user, username)
-                    
                     if count:
                         cursor.execute(base_query + " LIMIT ?", params + (count,))
                     else:
                         cursor.execute(base_query, params)
                 else:
-                    return []  # return empty if no other_user specified for past messages
+                    return []
                         
             return [{
                 'id': row[0],
@@ -87,7 +86,7 @@ class DatabaseManager:
                 'message': row[2],
                 'timestamp': row[3]
             } for row in cursor.fetchall()]
-                                    
+                                                            
     def get_message(self, message_id):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -260,9 +259,12 @@ class DatabaseManager:
             
             if result:
                 stored_password = result[0]
-                return bcrypt.checkpw(password.encode('utf-8'), stored_password)
+                try:
+                    return bcrypt.checkpw(password.encode('utf-8'), stored_password)
+                except ValueError:
+                    return False
             return False
-
+        
     def get_account(self, username):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
