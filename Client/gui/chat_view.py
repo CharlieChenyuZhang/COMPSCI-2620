@@ -2,6 +2,7 @@ import streamlit as st
 
 def chat_view():
     st.sidebar.success(f"Logged in as {st.session_state.username}")
+    st.sidebar.success(f"You have {10} unread messages")
 
     # Fake user list in sidebar
     st.sidebar.subheader("Select a user to chat with")
