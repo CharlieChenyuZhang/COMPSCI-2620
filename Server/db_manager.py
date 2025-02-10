@@ -1,5 +1,6 @@
 import sqlite3
 import bcrypt
+from datetime import datetime
 
 class DatabaseManager:
     def __init__(self, db_path="./chat.db"):
@@ -18,7 +19,7 @@ class DatabaseManager:
                 )
             ''')
             
-            # create messages table for future use
+            # create messages table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS messages (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,12 +28,214 @@ class DatabaseManager:
                     content TEXT NOT NULL,
                     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                     read BOOLEAN DEFAULT 0,
-                    FOREIGN KEY (sender) REFERENCES accounts (username),
-                    FOREIGN KEY (recipient) REFERENCES accounts (username)
+                    FOREIGN KEY (sender) REFERENCES accounts (username) ON DELETE CASCADE,
+                    FOREIGN KEY (recipient) REFERENCES accounts (username) ON DELETE CASCADE
                 )
             ''')
             
+            # enable foreign key support
+            cursor.execute("PRAGMA foreign_keys = ON")
             conn.commit()
+
+    def store_message(self, sender, recipient, content):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO messages (sender, recipient, content) VALUES (?, ?, ?)",
+                (sender, recipient, content)
+            )
+            conn.commit()
+            return cursor.lastrowid
+
+    def get_messages(self, username, other_user=None, count=None, unread_only=False, read_only=False):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            if unread_only:
+                # only get unread messages where user is recipient
+                query = """
+                    SELECT id, sender, content, timestamp 
+                    FROM messages 
+                    WHERE recipient = ? AND read = 0 
+                    ORDER BY timestamp DESC
+                """
+                cursor.execute(query, (username,))
+            else:
+                if other_user:
+                    base_query = """
+                        SELECT id, sender, content, timestamp 
+                        FROM messages 
+                        WHERE ((sender = ? AND recipient = ?) 
+                        OR (sender = ? AND recipient = ?))
+                    """
+                    if read_only:
+                        base_query += " AND read = 1"
+                    base_query += " ORDER BY timestamp DESC"
+                    
+                    params = (username, other_user, other_user, username)
+                    
+                    if count:
+                        cursor.execute(base_query + " LIMIT ?", params + (count,))
+                    else:
+                        cursor.execute(base_query, params)
+                else:
+                    return []  # return empty if no other_user specified for past messages
+                        
+            return [{
+                'id': row[0],
+                'sender': row[1],
+                'message': row[2],
+                'timestamp': row[3]
+            } for row in cursor.fetchall()]
+                                    
+    def get_message(self, message_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, sender, recipient, content, timestamp, read 
+                FROM messages 
+                WHERE id = ?
+                """,
+                (message_id,)
+            )
+            result = cursor.fetchone()
+            if result:
+                return {
+                    'id': result[0],
+                    'sender': result[1],
+                    'recipient': result[2],
+                    'content': result[3],
+                    'timestamp': result[4],
+                    'read': bool(result[5])
+                }
+            return None
+
+    def get_unread_messages(self, username):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, sender, content, timestamp 
+                FROM messages 
+                WHERE recipient = ? AND read = 0 
+                ORDER BY timestamp
+                """,
+                (username,)
+            )
+            return [{
+                'id': row[0],
+                'sender': row[1],
+                'message': row[2],
+                'timestamp': row[3]
+            } for row in cursor.fetchall()]
+
+    def get_past_messages(self, username, count):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, sender, content, timestamp, read 
+                FROM messages 
+                WHERE recipient = ? 
+                ORDER BY timestamp DESC 
+                LIMIT ?
+                """,
+                (username, count)
+            )
+            return [{
+                'id': row[0],
+                'sender': row[1],
+                'message': row[2],
+                'timestamp': row[3],
+                'read': bool(row[4])
+            } for row in cursor.fetchall()]
+
+    def mark_message_read(self, message_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE messages SET read = 1 WHERE id = ?",
+                (message_id,)
+            )
+            conn.commit()
+
+    def mark_messages_read(self, username):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE messages SET read = 1 WHERE recipient = ? AND read = 0",
+                (username,)
+            )
+            conn.commit()
+
+    def delete_message(self, message_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "DELETE FROM messages WHERE id = ?",
+                (message_id,)
+            )
+            conn.commit()
+
+    def delete_account(self, username):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            # cascade will automatically delete related messages
+            cursor.execute(
+                "DELETE FROM accounts WHERE username = ?",
+                (username,)
+            )
+            conn.commit()
+
+    def get_unread_count(self, username):
+        """Get count of unread messages for a user"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT COUNT(*) FROM messages WHERE recipient = ? AND read = 0",
+                (username,)
+            )
+            return cursor.fetchone()[0]
+        
+    def get_unread_messages(self, username):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, sender, content, timestamp 
+                FROM messages 
+                WHERE recipient = ? AND read = 0 
+                ORDER BY timestamp DESC
+                """,
+                (username,)
+            )
+            return [{
+                'id': row[0],
+                'sender': row[1],
+                'message': row[2],
+                'timestamp': row[3]
+            } for row in cursor.fetchall()]
+
+    def get_past_messages(self, username, count):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, sender, content, timestamp 
+                FROM messages 
+                WHERE recipient = ? AND read = 1
+                ORDER BY timestamp DESC 
+                LIMIT ?
+                """,
+                (username, count)
+            )
+            return [{
+                'id': row[0],
+                'sender': row[1],
+                'message': row[2],
+                'timestamp': row[3]
+            } for row in cursor.fetchall()]
 
     def create_account(self, username, hashed_password):
         try:
