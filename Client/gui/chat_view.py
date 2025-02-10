@@ -19,11 +19,11 @@ def chat_view():
         # Display chat messages
         messages = st.session_state.user_chats[selected_user]
         for index, message in enumerate(messages):
-            col1, col2 = st.columns([0.9, 0.1])
+            col1, col2 = st.columns([0.8, 0.2])
             with col1:
                 st.write(f"**{message['user']}**: {message['text']}")
             with col2:
-                if st.button("❌", key=f"delete_{index}"):
+                if st.button("Delete", key=f"delete_{index}"):
                     messages.pop(index)
                     st.session_state.user_chats[selected_user] = messages
                     st.rerun()
