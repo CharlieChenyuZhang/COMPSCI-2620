@@ -1,8 +1,9 @@
 import socket
+from config import server_host, server_port
 
 def send_request(request):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('localhost', 12345))  # Connect to the server
+        s.connect((server_host, server_port))  # Use config values
         s.sendall(request.encode('utf-8'))  # Send request
         response = s.recv(1024)  # Receive response
         return response.decode('utf-8')
