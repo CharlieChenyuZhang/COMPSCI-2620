@@ -189,7 +189,6 @@ class DatabaseManager:
             conn.commit()
 
     def get_unread_count(self, username):
-        """Get count of unread messages for a user"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(

@@ -7,7 +7,7 @@ class CustomProtocol(ProtocolBase):
         
         if status == 'success':
             if 'unread_count' in response_dict:
-                # Login/Create Account response
+                # Login/Create account response
                 return f"SUCCESS {response_dict['unread_count']}".encode('utf-8')
             elif 'accounts' in response_dict:
                 # List accounts response
