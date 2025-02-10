@@ -18,8 +18,15 @@ def chat_view():
 
         # Display chat messages
         messages = st.session_state.user_chats[selected_user]
-        for message in messages:
-            st.write(f"**{message['user']}**: {message['text']}")
+        for index, message in enumerate(messages):
+            col1, col2 = st.columns([0.9, 0.1])
+            with col1:
+                st.write(f"**{message['user']}**: {message['text']}")
+            with col2:
+                if st.button("❌", key=f"delete_{index}"):
+                    messages.pop(index)
+                    st.session_state.user_chats[selected_user] = messages
+                    st.rerun()
 
         # Chat input
         user_input = st.text_input("Type your message here...")
@@ -34,6 +41,14 @@ def chat_view():
 
     # Logout button
     if st.button("Logout"):
+        st.session_state.authenticated = False
+        st.session_state.username = None
+        st.session_state.user_chats = {}
+        st.rerun()
+
+    # Add this code block after the existing Logout button code
+    if st.button("Delete Account"):
+        # Perform any necessary account deletion logic here
         st.session_state.authenticated = False
         st.session_state.username = None
         st.session_state.user_chats = {}
