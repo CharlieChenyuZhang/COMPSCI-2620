@@ -5,6 +5,8 @@ from enum import IntEnum
 from protocol_json import JSONProtocol
 from protocol_custom import CustomProtocol
 
+from db_manager import DatabaseManager
+
 class OpCode(IntEnum):
     CREATE_ACCOUNT = 0
     LOGIN = 1 
@@ -17,8 +19,8 @@ class ChatServer:
         self.port = port
         
         self.protocol = JSONProtocol() if use_json else CustomProtocol() # default is JSON
+        self.db = DatabaseManager()
 
-        self.accounts = {}  # {username: {'password': hashed_password, 'unread_messages': []}}
         self.active_connections = {}  # {username: connection}
 
     def hash_password(self, password):
@@ -31,43 +33,59 @@ class ChatServer:
         username = data.get('username')
         password = data.get('password')
 
-        if username in self.accounts:
-            if self.verify_password(password, self.accounts[username]['password']):
-                return self.protocol.create_response(False, 'FAILURE: Account already exists and password matches')
-            return self.protocol.create_response(False, 'FAILURE: Account exists but password is incorrect')
+        if self.db.account_exists(username):
+            if self.db.verify_account(username, password):
+                return self.protocol.create_response(
+                    False, 
+                    'FAILURE: Account already exists and password matches'
+                )
+            return self.protocol.create_response(
+                False, 
+                'FAILURE: Account exists but password is incorrect'
+            )
         
         hashed_password = self.hash_password(password)
-        self.accounts[username] = {
-            'password': hashed_password,
-            'unread_messages': []
-        }
-        return self.protocol.create_response(True, 'SUCCESS: Account created successfully')
+        if self.db.create_account(username, hashed_password):
+            return self.protocol.create_response(
+                True, 
+                'SUCCESS: Account created successfully'
+            )
+        return self.protocol.create_response(
+            False, 
+            'FAILURE: Could not create account'
+        )
 
     def handle_login(self, data, conn):
         username = data.get('username')
         password = data.get('password')
 
-        if username not in self.accounts:
-            return self.protocol.create_response(False, 'FAILURE: Account does not exist')
+        if not self.db.account_exists(username):
+            return self.protocol.create_response(
+                False, 
+                'FAILURE: Account does not exist'
+            )
 
-        if not self.verify_password(password, self.accounts[username]['password']):
-            return self.protocol.create_response(False, 'FAILURE: Incorrect password')
+        if not self.db.verify_account(username, password):
+            return self.protocol.create_response(
+                False, 
+                'FAILURE: Incorrect password'
+            )
 
-        unread_count = len(self.accounts[username]['unread_messages']) # to do
         self.active_connections[username] = conn
-        
+        # TODO: Implement unread messages count from database
         return self.protocol.create_response(
             True, 
-            f'SUCCESS: Login successful. You have {unread_count} unread messages'
+            f'SUCCESS: Login successful. You have 0 unread messages'
         )
 
     def handle_list_accounts(self):
+        accounts = self.db.list_accounts()
         return self.protocol.create_response(
             True,
             'SUCCESS: Accounts retrieved',
-            {'accounts': list(self.accounts.keys())}
+            {'accounts': accounts}
         )
-    
+            
     def handle_client(self, conn, addr):
         while True:
             try:
@@ -84,7 +102,7 @@ class ChatServer:
                 elif opcode == OpCode.LOGIN:
                     response = self.handle_login(request, conn)
                 elif opcode == OpCode.LIST_ACCOUNTS:
-                    response = self.handle_list_accounts(request)
+                    response = self.handle_list_accounts()  # Remove the request parameter
 
                 conn.sendall(self.protocol.encode_response(response))
             except Exception as e:
@@ -92,7 +110,7 @@ class ChatServer:
                 break
 
         conn.close()
-
+        
     def start(self):
         # open socket
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
