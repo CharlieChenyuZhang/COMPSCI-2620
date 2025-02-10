@@ -14,6 +14,7 @@ Set up `Conda Virtual Environments`
 - conda create --name cs262-venv python=3.9
 - conda activate cs262-venv
 - pip install streamlit
+- pip install bcrypt
 
 ## how to run
 
