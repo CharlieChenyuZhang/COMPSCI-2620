@@ -40,7 +40,9 @@ def read_messages(count):
         "action": "read",
         "count": count
     }
-    return send_request(request)
+    response = send_request(request)
+    print("read_messages response", response)
+    return response.get("messages", [])
 
 def list_accounts(pattern="*"):
     request = {
@@ -53,5 +55,5 @@ def list_accounts(pattern="*"):
         accounts = response.get("accounts", [])
         # FIXME: use this when the server is ready
         # return {account['username']: account['unread_count'] for account in accounts}
-        return {account: "fixme_10" for account in accounts}
+        return {account: 10 for account in accounts}
     return {}

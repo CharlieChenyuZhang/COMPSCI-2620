@@ -28,7 +28,6 @@ def login_view():
                 logger.info(f"Successful login for user: {username}")
                 st.session_state.authenticated = True
                 st.session_state.username = username
-                st.session_state.user_chats = response.get(ResponseFields.CHATS, {})
                 st.rerun()
             else:
                 logger.warning(f"Failed login attempt for user: {username}")
