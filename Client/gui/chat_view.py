@@ -1,23 +1,34 @@
 import streamlit as st
+import logging
+from protocol_JSON import list_accounts  # or from protocol_custom import list_accounts
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 def chat_view():
+    logger.info("Rendering chat view")
     st.sidebar.success(f"Logged in as {st.session_state.username}")
-    st.sidebar.success(f"You have {10} unread messages")
+    
+    # Fetch and display the list of accounts with unread counts
+    logger.info("Fetching list of accounts")
+    accounts = list_accounts()
+    logger.info(f"Accounts fetched: {accounts}")
+    st.session_state.user_chats = accounts
 
-    # Search bar for filtering users
-    search_query = st.sidebar.text_input("Search users")
-
-    # Fake user list in sidebar
     st.sidebar.subheader("Select a user to chat with")
-    for user in st.session_state.user_chats.keys():
-        if search_query.lower() in user.lower():  # Filter users based on search query
-            if st.sidebar.button(user):
-                st.session_state.selected_user = user
+    for user, unread_count in st.session_state.user_chats.items():
+        if st.sidebar.button(f"{user} ({unread_count} unread)"):
+            logger.info(f"User selected to chat with: {user}")
+            st.session_state.selected_user = user
 
     selected_user = st.session_state.get("selected_user", None)
 
     if selected_user:
-        # Display chat interface
+        logger.info(f"Displaying chat interface for user: {selected_user}")
         st.title(f"Chat with {selected_user}")
 
         # Display chat messages
@@ -28,6 +39,7 @@ def chat_view():
                 st.write(f"**{message['user']}**: {message['text']}")
             with col2:
                 if st.button("Delete", key=f"delete_{index}"):
+                    logger.info(f"Deleting message at index {index} for user {selected_user}")
                     messages.pop(index)
                     st.session_state.user_chats[selected_user] = messages
                     st.rerun()
@@ -37,14 +49,17 @@ def chat_view():
 
         if st.button("Send"):
             if user_input:
+                logger.info(f"Sending message from {st.session_state.username} to {selected_user}")
                 messages.append({"user": st.session_state.username, "text": user_input})
                 st.session_state.user_chats[selected_user] = messages
                 st.rerun()
     else:
+        logger.info("No user selected for chat")
         st.write("Please select a user from the sidebar to start chatting.")
 
     # Logout button
     if st.button("Logout"):
+        logger.info(f"User {st.session_state.username} logged out")
         st.session_state.authenticated = False
         st.session_state.username = None
         st.session_state.user_chats = {}
@@ -52,6 +67,7 @@ def chat_view():
 
     # Add this code block after the existing Logout button code
     if st.button("Delete Account"):
+        logger.info(f"User {st.session_state.username} requested account deletion")
         # Perform any necessary account deletion logic here
         st.session_state.authenticated = False
         st.session_state.username = None

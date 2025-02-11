@@ -26,3 +26,17 @@ def send_message(recipient, message):
 def read_messages(count):
     request = f"READ {count}"
     return send_request(request)
+
+def list_accounts(pattern="*"):
+    request = f"LIST {pattern}"
+    response = send_request(request)
+    if response.startswith("ACCOUNTS"):
+        parts = response.split()
+        num_accounts = int(parts[1])
+        accounts = {}
+        for i in range(num_accounts):
+            username = parts[2 + i * 2]
+            unread_count = int(parts[3 + i * 2])
+            accounts[username] = unread_count
+        return accounts
+    return {}
