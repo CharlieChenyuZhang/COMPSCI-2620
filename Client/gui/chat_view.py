@@ -4,11 +4,15 @@ def chat_view():
     st.sidebar.success(f"Logged in as {st.session_state.username}")
     st.sidebar.success(f"You have {10} unread messages")
 
+    # Search bar for filtering users
+    search_query = st.sidebar.text_input("Search users")
+
     # Fake user list in sidebar
     st.sidebar.subheader("Select a user to chat with")
     for user in st.session_state.user_chats.keys():
-        if st.sidebar.button(user):
-            st.session_state.selected_user = user
+        if search_query.lower() in user.lower():  # Filter users based on search query
+            if st.sidebar.button(user):
+                st.session_state.selected_user = user
 
     selected_user = st.session_state.get("selected_user", None)
 

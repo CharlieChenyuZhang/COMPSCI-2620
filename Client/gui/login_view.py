@@ -1,4 +1,14 @@
 import streamlit as st
+import protocol_JSON
+import logging
+from constants import Actions, ResponseStatus, ResponseFields
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 def login_view():
     """Handles user login UI."""
@@ -7,26 +17,22 @@ def login_view():
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if username and password:  # Mock authentication
-            st.session_state.authenticated = True
-            st.session_state.username = username
-            st.session_state.user_chats = {
-                "Alice": [
-                    {"user": "Alice", "text": "Hey there!"},
-                    {"user": "Chenyu", "text": "Hi Alice, how's it going?"},
-                    {"user": "Alice", "text": "Pretty good! Just working on a project."}
-                ],
-                "Bob": [
-                    {"user": "Bob", "text": "Hello! How are you?"},
-                    {"user": "Chenyu", "text": "Hey Bob, I'm doing well. What about you?"},
-                    {"user": "Bob", "text": "I'm great! Just enjoying my day."}
-                ],
-                "Charlie": [
-                    {"user": "Charlie", "text": "Nice to meet you!"},
-                    {"user": "Chenyu", "text": "Nice to meet you too, Charlie! What do you do?"},
-                    {"user": "Charlie", "text": "I work as a software engineer. How about you?"}
-                ],
-            }
-            st.rerun()
+        logger.info(f"Login attempt for username: {username}")
+        
+        if username and password:
+            logger.info(f"Attempting to authenticate user: {username}")
+            response = protocol_JSON.login(username, password)
+            logger.debug(f"Server response for login attempt by {username}: {response}")
+            
+            if response.get(ResponseFields.STATUS) == ResponseStatus.SUCCESS:
+                logger.info(f"Successful login for user: {username}")
+                st.session_state.authenticated = True
+                st.session_state.username = username
+                st.session_state.user_chats = response.get(ResponseFields.CHATS, {})
+                st.rerun()
+            else:
+                logger.warning(f"Failed login attempt for user: {username}")
+                st.error(response.get(ResponseFields.MESSAGE, "Invalid username or password."))
         else:
-            st.error("Invalid username or password.")
+            logger.warning("Login attempt with missing credentials")
+            st.error("Please enter both username and password.")

@@ -1,6 +1,8 @@
 import socket
 import json
-from config import server_host, server_port
+from utils import get_server_config
+
+server_host, server_port = get_server_config()
 
 def send_request(request):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
