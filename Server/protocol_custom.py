@@ -7,14 +7,13 @@ class CustomProtocol(ProtocolBase):
         
         if status == 'success':
             if 'unread_count' in response_dict:
-                # Login/Create account response
                 return f"SUCCESS {response_dict['unread_count']}".encode('utf-8')
             elif 'accounts' in response_dict:
-                # List accounts response
-                accounts = response_dict['accounts']
-                return f"ACCOUNTS {len(accounts)} {' '.join(accounts)}".encode('utf-8')
+                account_parts = []
+                for acc in response_dict['accounts']:
+                    account_parts.extend([acc['username'], str(acc['unread_count'])])
+                return f"ACCOUNTS {len(response_dict['accounts'])} {' '.join(account_parts)}".encode('utf-8')
             elif 'messages' in response_dict:
-                # Read messages response
                 messages = response_dict['messages']
                 message_parts = []
                 for msg in messages:
@@ -22,12 +21,10 @@ class CustomProtocol(ProtocolBase):
                     message_parts.append(f"{msg['sender']} {len(content)} {content}")
                 return f"MESSAGES {len(messages)} {' '.join(message_parts)}".encode('utf-8')
             else:
-                # Generic success response
                 return b"SUCCESS"
         else:
-            # Error response
             return f"ERROR {message}".encode('utf-8')
-
+        
     def decode_request(self, data):
         try:
             parts = data.decode('utf-8').split()
@@ -50,7 +47,8 @@ class CustomProtocol(ProtocolBase):
             elif action == 'list':
                 return {
                     'action': 'list',
-                    'pattern': parts[1] if len(parts) > 1 else '*'
+                    'pattern': parts[1],
+                    'user_name': parts[2]
                 }
             elif action == 'send':
                 recipient = parts[1]
@@ -63,14 +61,15 @@ class CustomProtocol(ProtocolBase):
                 }
             elif action == 'read':
                 return {
-                    'action': 'load-unread' if parts[1].lower() == 'unread' else 'load-past',
-                    'count': int(parts[2]) if len(parts) > 2 else None,
-                    'recipient': parts[3] if len(parts) > 3 else None
+                    'action': 'read',
+                    'count': int(parts[1])
                 }
             elif action == 'delete':
+                # Support multiple message IDs
+                message_ids = [int(mid) for mid in parts[1:]]
                 return {
                     'action': 'delete',
-                    'message_id': int(parts[1])
+                    'message_ids': message_ids
                 }
             elif action == 'delete_account':
                 return {

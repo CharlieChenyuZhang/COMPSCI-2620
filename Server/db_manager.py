@@ -52,7 +52,6 @@ class DatabaseManager:
             cursor = conn.cursor()
             
             if unread_only:
-                # Get unread messages for recipient
                 query = """
                     SELECT id, sender, content, timestamp 
                     FROM messages 
@@ -128,6 +127,37 @@ class DatabaseManager:
                 'message': row[2],
                 'timestamp': row[3]
             } for row in cursor.fetchall()]
+    
+    def read_messages(self, username, count):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, sender, content, timestamp 
+                FROM messages 
+                WHERE recipient = ? AND read = 0
+                ORDER BY timestamp 
+                LIMIT ?
+                """,
+                (username, count)
+            )
+            messages = [{
+                'id': row[0],
+                'sender': row[1],
+                'message': row[2],
+                'timestamp': row[3]
+            } for row in cursor.fetchall()]
+            
+            if messages:
+                message_ids = [msg['id'] for msg in messages]
+                placeholders = ','.join('?' * len(message_ids))
+                cursor.execute(
+                    f"DELETE FROM messages WHERE id IN ({placeholders})",
+                    message_ids
+                )
+                conn.commit()
+                
+            return messages
 
     def get_past_messages(self, username, count):
         with sqlite3.connect(self.db_path) as conn:
@@ -193,6 +223,19 @@ class DatabaseManager:
             cursor.execute(
                 "SELECT COUNT(*) FROM messages WHERE recipient = ? AND read = 0",
                 (username,)
+            )
+            return cursor.fetchone()[0]
+        
+    def get_unread_count_from_sender(self, recipient, sender):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT COUNT(*) 
+                FROM messages 
+                WHERE recipient = ? AND sender = ? AND read = 0
+                """,
+                (recipient, sender)
             )
             return cursor.fetchone()[0]
         

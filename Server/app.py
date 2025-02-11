@@ -93,9 +93,16 @@ class ChatServer:
         
     def handle_list_accounts(self, data):
         pattern = data.get('pattern', '*')
+        user_name = data.get('user_name')
+        
+        if not user_name:
+            return {
+                'status': 'error',
+                'message': 'User name required'
+            }
+        
         accounts = self.db.list_accounts()
         
-        # handle pattern matching
         if pattern != '*':
             try:
                 regex = re.compile(pattern)
@@ -105,12 +112,21 @@ class ChatServer:
                     'status': 'error',
                     'message': 'Invalid pattern'
                 }
+        
+        account_details = []
+        for account in accounts:
+            if account != user_name:
+                unread_count = self.db.get_unread_count_from_sender(user_name, account)
+                account_details.append({
+                    'username': account,
+                    'unread_count': unread_count
+                })
                 
         return {
             'status': 'success',
-            'accounts': accounts
+            'accounts': account_details
         }
-        
+                
     def handle_send_message(self, data, sender_conn):
         sender = self.user_connections.get(sender_conn)
         if not sender:
@@ -122,7 +138,6 @@ class ChatServer:
         recipient = data.get('recipient')
         message = data.get('message')
         
-        # check if user is trying to send message to themselves
         if sender == recipient:
             return {
                 'status': 'error',
@@ -135,7 +150,7 @@ class ChatServer:
                 'message': 'Recipient does not exist'
             }
 
-        # store message in database
+        # Store message in database
         message_id = self.db.store_message(sender, recipient, message)
         if not message_id:
             return {
@@ -143,9 +158,9 @@ class ChatServer:
                 'message': 'Failed to store message'
             }
 
-        # if recipient is online, send message immediately
+        # If both parties are online, deliver message immediately
         recipient_conn = self.active_connections.get(recipient)
-        if recipient_conn:
+        if recipient_conn and sender_conn:
             try:
                 notification = {
                     'status': 'message-received',
@@ -155,7 +170,8 @@ class ChatServer:
                     'timestamp': datetime.now().isoformat()
                 }
                 recipient_conn.sendall(self.protocol.encode_response(notification))
-                # don't mark as read here - let recipient explicitly mark when loaded
+                # Mark as read since both parties are online
+                self.db.mark_message_read(message_id)
             except Exception:
                 pass
 

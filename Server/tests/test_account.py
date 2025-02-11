@@ -41,7 +41,8 @@ def test_login(server, mock_connection):
     assert response['status'] == 'error'
     
 def test_list_accounts(server):
-    # create test accounts
+    """Test account listing functionality"""
+    # Create test accounts
     usernames = ['user1', 'user2', 'testuser']
     for username in usernames:
         server.handle_create_account({
@@ -50,16 +51,28 @@ def test_list_accounts(server):
             'password': 'testpass'
         })
     
-    # test listing all accounts
-    response = server.handle_list_accounts({'pattern': '*'})
+    # Test listing all accounts
+    response = server.handle_list_accounts({
+        'pattern': '*',
+        'user_name': 'testuser'  # Add the required user_name parameter
+    })
     assert response['status'] == 'success'
-    assert set(response['accounts']) == set(usernames)
     
-    # test pattern matching
-    response = server.handle_list_accounts({'pattern': 'user.*'})
+    # Verify accounts returned include unread counts
+    accounts = response.get('accounts', [])
+    account_usernames = [acc['username'] for acc in accounts]
+    assert set(account_usernames) == set(['user1', 'user2'])  # Should exclude testuser
+    
+    # Test pattern matching
+    response = server.handle_list_accounts({
+        'pattern': 'user.*',
+        'user_name': 'testuser'
+    })
     assert response['status'] == 'success'
-    assert set(response['accounts']) == {'user1', 'user2'}
-
+    accounts = response.get('accounts', [])
+    account_usernames = [acc['username'] for acc in accounts]
+    assert set(account_usernames) == {'user1', 'user2'}
+    
 def test_delete_account(server, mock_connection):
     # create and login test account
     username = 'deleteuser'
