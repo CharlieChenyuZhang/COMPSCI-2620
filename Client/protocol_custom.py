@@ -1,5 +1,7 @@
 import socket
-from config import server_host, server_port
+from utils import get_server_config
+
+server_host, server_port = get_server_config()
 
 def send_request(request):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -24,3 +26,17 @@ def send_message(recipient, message):
 def read_messages(count):
     request = f"READ {count}"
     return send_request(request)
+
+def list_accounts(pattern="*"):
+    request = f"LIST {pattern}"
+    response = send_request(request)
+    if response.startswith("ACCOUNTS"):
+        parts = response.split()
+        num_accounts = int(parts[1])
+        accounts = {}
+        for i in range(num_accounts):
+            username = parts[2 + i * 2]
+            unread_count = int(parts[3 + i * 2])
+            accounts[username] = unread_count
+        return accounts
+    return {}

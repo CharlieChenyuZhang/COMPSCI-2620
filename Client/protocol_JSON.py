@@ -1,6 +1,8 @@
 import socket
 import json
-from config import server_host, server_port
+from utils import get_server_config
+
+server_host, server_port = get_server_config()
 
 def send_request(request):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -38,4 +40,20 @@ def read_messages(count):
         "action": "read",
         "count": count
     }
-    return send_request(request)
+    response = send_request(request)
+    print("read_messages response", response)
+    return response.get("messages", [])
+
+def list_accounts(pattern="*"):
+    request = {
+        "action": "list",
+        "pattern": pattern
+    }
+    response = send_request(request)
+    print("response", response)
+    if response.get("status") == "success":
+        accounts = response.get("accounts", [])
+        # FIXME: use this when the server is ready
+        # return {account['username']: account['unread_count'] for account in accounts}
+        return {account: 10 for account in accounts}
+    return {}

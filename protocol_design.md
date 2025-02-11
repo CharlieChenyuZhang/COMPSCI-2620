@@ -1,11 +1,12 @@
-Custom Wire Protocol
+## Custom Wire Protocol
+
 Account Creation and Login:
 Request: CREATE <username> <hashed_password> or LOGIN <username> <hashed_password>
 Response: SUCCESS <unread_count> or ERROR <message>
 
 List Accounts:
 Request: LIST <pattern>
-Response: ACCOUNTS <count> <username1> <username2> ...
+Response: ACCOUNTS <numbe_of_user_count> <username1> <username1_unread_count> <username2> <username2_unread_count>...
 
 Send Message:
 Request: SEND <recipient> <message_length> <message>
@@ -23,7 +24,8 @@ Delete Account:
 Request: DELETE_ACCOUNT <username> <hashed_password>
 Response: SUCCESS or ERROR <message>
 
-JSON-Based Protocol
+## JSON-Based Protocol
+
 Account Creation and Login:
 Request: {"action": "create", "username": "<username>", "password": "<hashed_password>"} or {"action": "login", "username": "<username>", "password": "<hashed_password>"}
 Response: {"status": "success", "unread_count": <count>} or {"status": "error", "message": "<error_message>"}
