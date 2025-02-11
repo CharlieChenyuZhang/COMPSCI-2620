@@ -1,6 +1,6 @@
 import streamlit as st
 import logging
-from protocol_JSON import list_accounts, read_messages
+from protocol_JSON import list_accounts, read_messages, send_message
 
 # Configure logging
 logging.basicConfig(
@@ -47,7 +47,7 @@ def chat_view():
 
         num_messages = st.number_input(
             f"Enter the number of unread messages to load (Max: {unread_count}):", 
-            min_value=1, max_value=int(unread_count), value=int(unread_count), step=1
+            min_value=0, max_value=int(unread_count), value=int(unread_count), step=1
         )
 
         if st.button("Submit"):
@@ -82,8 +82,23 @@ def chat_view():
         if st.button("Send"):
             if user_input:
                 logger.info(f"Sending message from {st.session_state.username} to {selected_user}")
-                st.session_state.chat_messages[selected_user].append({"user": st.session_state.username, "text": user_input})
+                
+                # Send the message to the server
+                response = send_message(selected_user, user_input)
+                print("send_message response", response)
+
+                if response.get("status") == "success":
+                    # Append the message to the local chat history
+                    st.session_state.chat_messages[selected_user].append({
+                        "user": st.session_state.username,
+                        "text": user_input
+                    })
+                    logger.info("Message sent successfully")
+                else:
+                    st.error("Failed to send message. Please try again.")
+
                 st.rerun()
+
     else:
         logger.info("No user selected for chat")
         st.write("Please select a user from the sidebar to start chatting.")
