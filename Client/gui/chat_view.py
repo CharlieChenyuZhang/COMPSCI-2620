@@ -37,7 +37,6 @@ def chat_view():
         st.session_state.user_unread_pair = accounts
         st.rerun()
     
-    print("DEBUG ??? user_unread_pair", st.session_state.user_unread_pair)
     for each in st.session_state.user_unread_pair:
         user, unread_count = each['username'], each['unread_count']
         if st.sidebar.button(f"{user} ({unread_count} unread)"):
@@ -71,13 +70,11 @@ def chat_view():
             new_messages = chat_client.read_messages(num_messages)
 
             # Store fetched messages separately
-            print("XXX new_messages", new_messages)
             if new_messages.get("status") == "error":
                 st.error(new_messages.get("message"))
                 st.rerun()
             else:
                 messages = new_messages.get("messages", [])
-                print("XXX chat_messages", messages)
                 # Ensure selected_user is in chat_messages
                 if selected_user not in st.session_state.chat_messages:
                     st.session_state.chat_messages[selected_user] = []
@@ -86,12 +83,10 @@ def chat_view():
                 st.session_state.chat_messages[selected_user].extend(messages)
                 
                 # Display the messages
-                print("??? chat_messages", st.session_state.chat_messages)
                 for msg in st.session_state.chat_messages[selected_user]:
                     st.write(f"{msg['sender']}: {msg['message']}")
 
             # Reduce unread count
-            print("XXX user_unread_pair", st.session_state.user_unread_pair)
             for user in st.session_state.user_unread_pair:
                 if user['username'] == selected_user:
                     user['unread_count'] = max(0, user['unread_count'] - num_messages)
@@ -102,13 +97,9 @@ def chat_view():
             st.rerun()
 
         # Display chat messages
-        print("DEBUG ??? selected_user", selected_user)
         if selected_user:
             messages = st.session_state.chat_messages[selected_user]
-            print("XXX messages", messages)
-            print("XXX chat_messages", st.session_state.chat_messages)
             for index, message in enumerate(messages):
-                print("XXX message", message)
                 col1, col2 = st.columns([0.8, 0.2])
                 with col1:
                     st.write(f"**{message['sender']}**: {message['message']}")
@@ -129,8 +120,6 @@ def chat_view():
                 logger.info(
                     f"Sending message from {st.session_state.username} to {selected_user}"
                 )
-
-                print("!!! session state", st.session_state)
 
                 # Send the message to the server using the persistent connection
                 response = chat_client.send_message(selected_user, user_input)
