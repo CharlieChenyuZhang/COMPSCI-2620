@@ -1,6 +1,6 @@
 import streamlit as st
 import logging
-from protocol_JSON import ChatClient  # Use persistent connection
+from protocol_JSON import ChatClient
 
 # Configure logging
 logging.basicConfig(

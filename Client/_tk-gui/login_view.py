@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import logging
-from protocol_JSON import ChatClient  # Ensure this module is correctly implemented
+from protocol_JSON import ChatClient
 
 # Configure logging
 logging.basicConfig(
