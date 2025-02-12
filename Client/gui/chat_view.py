@@ -15,7 +15,7 @@ def chat_view():
 
     # Fetch and display the list of accounts with unread counts
     logger.info("Fetching list of accounts")
-    accounts = chat_client.list_accounts()
+    accounts = chat_client.list_accounts(username=st.session_state.username)
     logger.info(f"Accounts fetched: {accounts}")
 
     # Ensure session state has necessary structures
@@ -26,7 +26,8 @@ def chat_view():
         st.session_state.chat_messages = {}  # Store chat history per user
 
     st.sidebar.subheader("Select a user to chat with")
-    for user, unread_count in st.session_state.user_unread_pair.items():
+    for each in st.session_state.user_unread_pair:
+        user, unread_count = each['username'], each['unread_count']
         if st.sidebar.button(f"{user} ({unread_count} unread)"):
             logger.info(f"User selected to chat with: {user}")
             st.session_state.selected_user = user
@@ -43,7 +44,7 @@ def chat_view():
         logger.info(f"Displaying chat interface for user: {selected_user}")
         st.title(f"Chat with {selected_user}")
 
-        unread_count = st.session_state.user_unread_pair[selected_user]
+        unread_count = next((user['unread_count'] for user in st.session_state.user_unread_pair if user['username'] == selected_user), None)
 
         num_messages = st.number_input(
             f"Enter the number of unread messages to load (Max: {unread_count}):",

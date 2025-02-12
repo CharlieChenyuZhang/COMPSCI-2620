@@ -64,10 +64,11 @@ class ChatClient:
         }
         return self.send_request(request)
 
-    def list_accounts(self, pattern="*"):
+    def list_accounts(self, pattern="*", username=None):
         request = {
             "action": "list",
-            "pattern": pattern
+            "pattern": pattern,
+            "user_name": username
         }
         response = self.send_request(request)
         print("list_accounts response", response)
