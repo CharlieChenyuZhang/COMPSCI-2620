@@ -3,6 +3,7 @@ import json
 from utils import get_server_config
 
 server_host, server_port = get_server_config()
+MSGLEN = 409600
 
 class ChatClient:
     def __init__(self):
@@ -10,7 +11,8 @@ class ChatClient:
         self.connected = False
     def connect(self):
         if self.connected:
-            self.disconnect()  # Ensure previous connection is closed
+            # self.disconnect()  # Ensure previous connection is closed
+            return
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((server_host, server_port))
         self.connected = True
@@ -29,7 +31,7 @@ class ChatClient:
                 print("!!! establish a new connection")
 
             self.sock.sendall(json.dumps(request).encode("utf-8"))
-            response = self.sock.recv(4096)  # Increase buffer size for large messages
+            response = self.sock.recv(MSGLEN)  # Increase buffer size for large messages
             return json.loads(response.decode("utf-8"))
         except Exception as e:
             print(f"Error: {e}")

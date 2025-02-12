@@ -67,6 +67,7 @@ class ChatServer:
         }
 
     def handle_login(self, data, conn):
+        print("XXX handle_login", data)
         username = data.get('username')
         password = data.get('password')
 
@@ -85,11 +86,13 @@ class ChatServer:
         # store connection and get unread count
         self.active_connections[username] = conn
         unread_count = self.db.get_unread_count(username)
-        
-        return {
+        print("XXX unread_count", unread_count)
+        response = {
             'status': 'success',
             'unread_count': unread_count
         }
+        print("response", response)
+        return response
         
     def handle_list_accounts(self, data):
         pattern = data.get('pattern', '*')
@@ -136,7 +139,11 @@ class ChatServer:
 
         recipient = data.get('recipient')
         message = data.get('message')
-
+        print("XXX sender", sender)
+        print("XXX recipient", recipient)
+        print("XXX self.active_connections", self.active_connections, len(self.active_connections))
+        print("XXX self.user_connections", self.user_connections, len(self.user_connections))
+        
         if sender == recipient:
             return {
                 'status': 'error',
@@ -350,7 +357,9 @@ class ChatServer:
         if conn in self.user_connections:
             username = self.user_connections[conn]
             if username in self.active_connections:
+                print(f"remove username {username} from active_connections")
                 del self.active_connections[username]
+            print(f"remove username {conn} from user_connections")
             del self.user_connections[conn]
         conn.close()
                         
