@@ -165,21 +165,22 @@ class ChatServer:
             }
 
         # If both parties are online, deliver message immediately
-        recipient_conn = self.active_connections.get(recipient)
-        if recipient_conn and sender_conn:
-            try:
-                notification = {
-                    'status': 'message-received',
-                    'message': message,
-                    'sender': sender,
-                    'message_id': message_id,
-                    'timestamp': datetime.now().isoformat()
-                }
-                recipient_conn.sendall(self.protocol.encode_response(notification))
-                # Mark as read since both parties are online
-                self.db.mark_message_read(message_id)
-            except Exception:
-                pass
+        # recipient_conn = self.active_connections.get(recipient)
+        # if recipient_conn and sender_conn:
+        #     print("both online!!!")
+        #     try:
+        #         notification = {
+        #             'status': 'message-received',
+        #             'message': message,
+        #             'sender': sender,
+        #             'message_id': message_id,
+        #             'timestamp': datetime.now().isoformat()
+        #         }
+        #         recipient_conn.sendall(self.protocol.encode_response(notification))
+        #         # Mark as read since both parties are online
+        #         self.db.mark_message_read(message_id)
+        #     except Exception:
+        #         pass
 
         return {'status': 'success', 'message_id': message_id}
 

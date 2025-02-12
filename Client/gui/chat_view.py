@@ -52,15 +52,16 @@ def chat_view():
 
         unread_count = next((user['unread_count'] for user in st.session_state.user_unread_pair if user['username'] == selected_user), None)
 
-        num_messages = st.number_input(
-            f"Enter the number of unread messages to load (Max: {unread_count}):",
-            min_value=0,
-            max_value=int(unread_count),
-            value=int(unread_count),
-            step=1,
-        )
+        # num_messages = st.number_input(
+        #     f"Enter the number of unread messages to load (Max: {unread_count}):",
+        #     min_value=0,
+        #     max_value=int(unread_count),
+        #     value=int(unread_count),
+        #     step=1,
+        # )
+        num_messages = unread_count
 
-        if st.button("Submit"):
+        if st.button("Load all unread messages"):
             logger.info(f"{st.session_state.username} - Fetching {num_messages} messages for {selected_user}")
             new_messages = chat_client.read_messages(num_messages)
 
@@ -168,13 +169,11 @@ def chat_view():
             response = chat_client.delete_account(st.session_state.username, delete_password)
             logger.info(f"{st.session_state.username} - delete_account response {response}")
 
-            if response.get("status") == "success":
-                st.success("Account deleted successfully.")
-                chat_client.logout()  # Close connection
-                st.session_state.authenticated = False
-                st.session_state.username = None
-                st.session_state.user_unread_pair = {}
-                st.session_state.chat_messages = {}
-                st.rerun()
-            else:
-                st.error(response.get("message", "Failed to delete account."))
+
+            chat_client.logout()  # Close connection
+            st.session_state.authenticated = False
+            st.session_state.username = None
+            st.session_state.user_unread_pair = {}
+            st.session_state.chat_messages = {}
+            st.rerun()
+            
