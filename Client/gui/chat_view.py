@@ -33,6 +33,11 @@ def chat_view():
         st.session_state.chat_messages = {}  # Store chat history per user
 
     st.sidebar.subheader("Select a user to chat with")
+    if st.sidebar.button("Reload"):
+        accounts = chat_client.list_accounts(username=st.session_state.username)
+        st.session_state.user_unread_pair = accounts
+        st.rerun()
+    
     for each in st.session_state.user_unread_pair:
         user, unread_count = each['username'], each['unread_count']
         if st.sidebar.button(f"{user} ({unread_count} unread)"):
@@ -81,8 +86,9 @@ def chat_view():
                 st.session_state.chat_messages[selected_user].extend(messages)
                 
                 # Display the messages
+                print("??? chat_messages", st.session_state.chat_messages)
                 for msg in st.session_state.chat_messages[selected_user]:
-                    st.write(f"{msg['timestamp']} - {msg['sender']}: {msg['message']}")
+                    st.write(f"{msg['sender']}: {msg['message']}")
 
             # Reduce unread count
             print("XXX user_unread_pair", st.session_state.user_unread_pair)

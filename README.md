@@ -17,8 +17,10 @@ Set up `Conda Virtual Environments`
 
 ## how to run
 
+`cd Client`
 `streamlit run app.py`
 
 # Server
 
+`cd Server`
 `python3 app.py`

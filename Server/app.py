@@ -164,6 +164,7 @@ class ChatServer:
                 'message': 'Failed to store message'
             }
 
+        # FIXME: temporarily disable message delivery because of streamlit issue
         # If both parties are online, deliver message immediately
         # recipient_conn = self.active_connections.get(recipient)
         # if recipient_conn and sender_conn:
