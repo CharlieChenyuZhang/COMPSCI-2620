@@ -35,13 +35,18 @@ class TestChatClient(unittest.TestCase):
 
     @patch('Client.protocol_JSON.ChatClient.send_request')
     def test_create_account(self, mock_send_request):
-        mock_send_request.return_value = {"status": "success"}
+        mock_send_request.return_value = {"status": "success", "unread_count": 0}
         response = self.client.create_account("user", "pass")
-        self.assertEqual(response, {"status": "success"})
+        self.assertEqual(response, {"status": "success", "unread_count": 0})
 
     @patch('Client.protocol_JSON.ChatClient.send_request')
     def test_login(self, mock_send_request):
-        mock_send_request.return_value = {"status": "success"}
+        # Mock account creation and login
+        mock_send_request.side_effect = [
+            {"status": "success", "unread_count": 0},  # Mock account creation
+            {"status": "success"}  # Mock login success
+        ]
+        self.client.create_account("user", "pass")
         response = self.client.login("user", "pass")
         self.assertEqual(response, {"status": "success"})
 
