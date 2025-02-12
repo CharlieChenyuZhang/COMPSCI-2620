@@ -67,7 +67,6 @@ class ChatServer:
         }
 
     def handle_login(self, data, conn):
-        print("XXX handle_login", data)
         username = data.get('username')
         password = data.get('password')
 
@@ -86,12 +85,10 @@ class ChatServer:
         # store connection and get unread count
         self.active_connections[username] = conn
         unread_count = self.db.get_unread_count(username)
-        print("XXX unread_count", unread_count)
         response = {
             'status': 'success',
             'unread_count': unread_count
         }
-        print("response", response)
         return response
         
     def handle_list_accounts(self, data):
@@ -139,10 +136,6 @@ class ChatServer:
 
         recipient = data.get('recipient')
         message = data.get('message')
-        print("XXX sender", sender)
-        print("XXX recipient", recipient)
-        print("XXX self.active_connections", self.active_connections, len(self.active_connections))
-        print("XXX self.user_connections", self.user_connections, len(self.user_connections))
         
         if sender == recipient:
             return {
@@ -168,7 +161,6 @@ class ChatServer:
         # If both parties are online, deliver message immediately
         # recipient_conn = self.active_connections.get(recipient)
         # if recipient_conn and sender_conn:
-        #     print("both online!!!")
         #     try:
         #         notification = {
         #             'status': 'message-received',
@@ -317,7 +309,6 @@ class ChatServer:
                                 response = self.handle_create_account(request)
                             elif action == Actions.LOGIN:
                                 response = self.handle_login(request, conn)
-                                print("XXX LOGIN response", response, conn, request['username'])
                                 if response['status'] == 'success':
                                     self.user_connections[conn] = request['username']
                             elif action == Actions.LIST:

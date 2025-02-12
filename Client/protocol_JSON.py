@@ -11,7 +11,6 @@ class ChatClient:
         self.connected = False
     def connect(self):
         if self.connected:
-            print("!!! Client disconnect a connection !!!")
             self.disconnect()  # Ensure previous connection is closed
             return
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,7 +28,6 @@ class ChatClient:
         try:
             if not self.connected:
                 self.connect()  # Ensure connection before sending request
-                print("!!! establish a new connection")
 
             self.sock.sendall(json.dumps(request).encode("utf-8"))
             response = self.sock.recv(MSGLEN)  # Increase buffer size for large messages
@@ -88,7 +86,6 @@ class ChatClient:
             "user_name": username
         }
         response = self.send_request(request)
-        print("list_accounts response", response)
         if response.get("status") == "success":
             return response.get("accounts", [])
         return {}
