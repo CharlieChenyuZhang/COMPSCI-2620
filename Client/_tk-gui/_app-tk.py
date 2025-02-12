@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-from tk-gui.login_view import LoginApp
-from tk-gui.signup_view import SignupApp
+from login_view import LoginApp
+from signup_view import SignupApp
 # from tk-gui.chat_view_tk import ChatApp  # Assuming you have a Chat GUI
 
 class MainApp:
