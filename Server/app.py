@@ -121,7 +121,6 @@ class ChatServer:
                     'username': account,
                     'unread_count': unread_count
                 })
-        print("XXX account_details", account_details)
         return {
             'status': 'success',
             'accounts': account_details
@@ -137,7 +136,7 @@ class ChatServer:
 
         recipient = data.get('recipient')
         message = data.get('message')
-        
+
         if sender == recipient:
             return {
                 'status': 'error',
