@@ -47,7 +47,7 @@ class DatabaseManager:
             conn.commit()
             return cursor.lastrowid
 
-    def get_messages(self, username, other_user=None, count=None, unread_only=False, read_only=False):
+    def get_messages(self, username, other_user=None, count=None, unread_only=False, read_only=False, message_sender=None):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             
@@ -55,10 +55,10 @@ class DatabaseManager:
                 query = """
                     SELECT id, sender, content, timestamp 
                     FROM messages 
-                    WHERE recipient = ? AND read = 0 
+                    WHERE recipient = ? AND sender = ? AND read = 0 
                     ORDER BY timestamp DESC
                 """
-                cursor.execute(query, (username,))
+                cursor.execute(query, (username, message_sender))
             else:
                 if other_user:
                     base_query = """
@@ -189,12 +189,12 @@ class DatabaseManager:
             )
             conn.commit()
 
-    def mark_messages_read(self, username):
+    def mark_messages_read(self, username, message_sender=None):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE messages SET read = 1 WHERE recipient = ? AND read = 0",
-                (username,)
+                "UPDATE messages SET read = 1 WHERE recipient = ? AND sender = ? AND read = 0",
+                (username, message_sender)
             )
             conn.commit()
 

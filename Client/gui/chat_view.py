@@ -37,6 +37,7 @@ def chat_view():
         st.session_state.user_unread_pair = accounts
         st.rerun()
     
+    print("!!! user_unread_pair", st.session_state.user_unread_pair)
     for each in st.session_state.user_unread_pair:
         user, unread_count = each['username'], each['unread_count']
         if st.sidebar.button(f"{user} ({unread_count} unread)"):
@@ -69,7 +70,7 @@ def chat_view():
 
         if st.button("Load all unread messages"):
             logger.info(f"{st.session_state.username} - Fetching {num_messages} messages for {selected_user}")
-            new_messages = chat_client.read_messages(num_messages)
+            new_messages = chat_client.read_messages(num_messages, selected_user) # selected_user is the sender in this case
 
             # Store fetched messages separately
             if new_messages.get("status") == "error":
@@ -89,13 +90,13 @@ def chat_view():
                     st.write(f"{msg['sender']}: {msg['message']}")
 
             # Reduce unread count
+            print("XXX user_unread_pair", st.session_state.user_unread_pair)
             for user in st.session_state.user_unread_pair:
                 if user['username'] == selected_user:
                     user['unread_count'] = max(0, user['unread_count'] - num_messages)
                     break
-            # st.session_state.user_unread_pair[selected_user]['unread_count'] -= num_messages
-            st.session_state.chat_loaded = True
-
+            print("after XXX user_unread_pair", st.session_state.user_unread_pair)
+            # st.session_state.chat_loaded = True
             st.rerun()
 
         # Display chat messages

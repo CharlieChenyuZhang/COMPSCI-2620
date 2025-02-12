@@ -188,11 +188,13 @@ class ChatServer:
         action = data.get('action')
         count = data.get('count')
         other_user = data.get('recipient')
+        message_sender = data.get('message_sender')
+        print("XXX message_sender", message_sender)
 
         if action == Actions.LOAD_UNREAD:
             # get unread messages for current user
             # TODO: right now, it returns all unread messages for the user
-            messages = self.db.get_messages(username, unread_only=True)
+            messages = self.db.get_messages(username, message_sender=message_sender, unread_only=True)
             if messages:
                 # mark messages as read after retrieving them
                 self.db.mark_messages_read(username)

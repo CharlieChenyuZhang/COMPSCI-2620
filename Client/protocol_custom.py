@@ -1,7 +1,7 @@
 import socket
 from utils import get_server_config
 
-server_host, server_port = get_server_config()
+server_host, server_port, _ = get_server_config()
 MSGLEN = 409600  # Increased buffer size for large messages
 
 class CustomChatClient:

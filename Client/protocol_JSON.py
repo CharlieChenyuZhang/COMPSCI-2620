@@ -2,7 +2,7 @@ import socket
 import json
 from utils import get_server_config
 
-server_host, server_port = get_server_config()
+server_host, server_port, _ = get_server_config()
 MSGLEN = 409600
 
 class ChatClient:
@@ -70,11 +70,12 @@ class ChatClient:
         }
         return self.send_request(request)
 
-    def read_messages(self, count):
+    def read_messages(self, count, message_sender):
         """Retrieve unread messages."""
         request = {
             "action": "load-unread",
-            "count": count
+            "count": count,
+            "message_sender": message_sender
         }
         return self.send_request(request)
 

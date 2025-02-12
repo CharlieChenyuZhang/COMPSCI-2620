@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import logging
 from protocol_JSON import ChatClient
+# from protocol_Custom import ChatClient
 
 # Configure logging
 logging.basicConfig(
