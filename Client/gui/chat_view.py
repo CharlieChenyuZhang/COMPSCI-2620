@@ -10,13 +10,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def chat_view():
-    logger.info("Rendering chat view")
     st.sidebar.success(f"Logged in as {st.session_state.username}")
 
     # Fetch and display the list of accounts with unread counts
     logger.info("Fetching list of accounts")
     accounts = chat_client.list_accounts(username=st.session_state.username)
-    logger.info(f"Accounts fetched: {accounts}")
+    logger.info(f"{st.session_state.username} - Accounts fetched: {accounts}")
 
     # Ensure session state has necessary structures
     if "user_unread_pair" not in st.session_state:
@@ -29,7 +28,7 @@ def chat_view():
     for each in st.session_state.user_unread_pair:
         user, unread_count = each['username'], each['unread_count']
         if st.sidebar.button(f"{user} ({unread_count} unread)"):
-            logger.info(f"User selected to chat with: {user}")
+            logger.info(f"{st.session_state.username} - User selected to chat with: {user}")
             st.session_state.selected_user = user
             st.session_state.unread_count = unread_count
             st.session_state.chat_loaded = False
@@ -41,7 +40,6 @@ def chat_view():
     selected_user = st.session_state.get("selected_user", None)
 
     if selected_user:
-        logger.info(f"Displaying chat interface for user: {selected_user}")
         st.title(f"Chat with {selected_user}")
 
         unread_count = next((user['unread_count'] for user in st.session_state.user_unread_pair if user['username'] == selected_user), None)
@@ -55,7 +53,7 @@ def chat_view():
         )
 
         if st.button("Submit"):
-            logger.info(f"Fetching {num_messages} messages for {selected_user}")
+            logger.info(f"{st.session_state.username} - Fetching {num_messages} messages for {selected_user}")
             new_messages = chat_client.read_messages(num_messages)
 
             # Store fetched messages separately
@@ -93,7 +91,7 @@ def chat_view():
 
                 # Send the message to the server using the persistent connection
                 response = chat_client.send_message(selected_user, user_input)
-
+                logger.info(f"{st.session_state.username} - send_message response {response}")
                 if response.get("status") == "success":
                     # Append the message to the local chat history
                     st.session_state.chat_messages[selected_user].append(
@@ -114,7 +112,7 @@ def chat_view():
 
     # Logout button
     if st.button("Logout"):
-        logger.info(f"User {st.session_state.username} logged out")
+        logger.info(f"{st.session_state.username} - User {st.session_state.username} logged out")
         chat_client.logout()  # Close connection properly
         st.session_state.authenticated = False
         st.session_state.username = None
@@ -124,7 +122,7 @@ def chat_view():
 
     # Delete account button
     if st.button("Delete Account"):
-        logger.info(f"User {st.session_state.username} requested account deletion")
+        logger.info(f"{st.session_state.username} - User {st.session_state.username} requested account deletion")
         st.session_state.authenticated = False
         st.session_state.username = None
         st.session_state.user_unread_pair = {}
