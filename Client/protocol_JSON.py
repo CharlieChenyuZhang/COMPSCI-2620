@@ -96,6 +96,16 @@ class ChatClient:
         """Disconnect from the server."""
         self.disconnect()
         print("Disconnected from server.")
+        
+    def delete_account(self, username, password):
+        """Delete an existing account."""
+        request = {
+            "action": "delete_account",
+            "username": username,
+            "password": password
+        }
+        return self.send_request(request)
+
 
 # Create a shared instance of ChatClient
 chat_client = ChatClient()

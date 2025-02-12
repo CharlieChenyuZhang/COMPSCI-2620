@@ -113,6 +113,8 @@ def chat_view():
                     f"Sending message from {st.session_state.username} to {selected_user}"
                 )
 
+                print("!!! session state", st.session_state)
+
                 # Send the message to the server using the persistent connection
                 response = chat_client.send_message(selected_user, user_input)
                 logger.info(f"{st.session_state.username} - send_message response {response}")
@@ -145,10 +147,26 @@ def chat_view():
         st.rerun()
 
     # Delete account button
+    # --- Delete account section ---
+    st.markdown("---")
+    st.subheader("Delete Your Account")
+    delete_password = st.text_input("Enter your password to confirm deletion:", type="password")
     if st.button("Delete Account"):
-        logger.info(f"{st.session_state.username} - User {st.session_state.username} requested account deletion")
-        st.session_state.authenticated = False
-        st.session_state.username = None
-        st.session_state.user_unread_pair = {}
-        st.session_state.chat_messages = {}
-        st.rerun()
+        if not delete_password:
+            st.error("Please enter your password to confirm account deletion.")
+        else:
+            logger.info(f"{st.session_state.username} - User requested account deletion")
+            # Call the protocol_JSON.py to delete the account (username + password)
+            response = chat_client.delete_account(st.session_state.username, delete_password)
+            logger.info(f"{st.session_state.username} - delete_account response {response}")
+
+            if response.get("status") == "success":
+                st.success("Account deleted successfully.")
+                chat_client.logout()  # Close connection
+                st.session_state.authenticated = False
+                st.session_state.username = None
+                st.session_state.user_unread_pair = {}
+                st.session_state.chat_messages = {}
+                st.rerun()
+            else:
+                st.error(response.get("message", "Failed to delete account."))

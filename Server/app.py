@@ -197,6 +197,7 @@ class ChatServer:
 
         if action == Actions.LOAD_UNREAD:
             # get unread messages for current user
+            # TODO: right now, it returns all unread messages for the user
             messages = self.db.get_messages(username, unread_only=True)
             if messages:
                 # mark messages as read after retrieving them
@@ -314,6 +315,7 @@ class ChatServer:
                                 response = self.handle_create_account(request)
                             elif action == Actions.LOGIN:
                                 response = self.handle_login(request, conn)
+                                print("XXX LOGIN response", response, conn, request['username'])
                                 if response['status'] == 'success':
                                     self.user_connections[conn] = request['username']
                             elif action == Actions.LIST:
