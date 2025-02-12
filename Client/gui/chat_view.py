@@ -51,7 +51,9 @@ def chat_view():
 
     selected_user = st.session_state.get("selected_user", None)
 
-    if selected_user:
+    # corner case when user just got removed from the list of users
+    is_user_exist = any(user['username'] == selected_user for user in st.session_state.user_unread_pair)
+    if selected_user and is_user_exist:
         st.title(f"{st.session_state.username} -> {selected_user}")
 
         unread_count = next((user['unread_count'] for user in st.session_state.user_unread_pair if user['username'] == selected_user), None)
