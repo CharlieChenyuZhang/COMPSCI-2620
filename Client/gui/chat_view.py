@@ -1,11 +1,11 @@
 import streamlit as st
 import logging
-from protocol_JSON import list_accounts, read_messages, send_message
+from protocol_JSON import chat_client  # Use persistent connection
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -15,9 +15,9 @@ def chat_view():
 
     # Fetch and display the list of accounts with unread counts
     logger.info("Fetching list of accounts")
-    accounts = list_accounts()
+    accounts = chat_client.list_accounts()
     logger.info(f"Accounts fetched: {accounts}")
-    
+
     # Ensure session state has necessary structures
     if "user_unread_pair" not in st.session_state:
         st.session_state.user_unread_pair = accounts  # Store unread counts
@@ -46,13 +46,16 @@ def chat_view():
         unread_count = st.session_state.user_unread_pair[selected_user]
 
         num_messages = st.number_input(
-            f"Enter the number of unread messages to load (Max: {unread_count}):", 
-            min_value=0, max_value=int(unread_count), value=int(unread_count), step=1
+            f"Enter the number of unread messages to load (Max: {unread_count}):",
+            min_value=0,
+            max_value=int(unread_count),
+            value=int(unread_count),
+            step=1,
         )
 
         if st.button("Submit"):
             logger.info(f"Fetching {num_messages} messages for {selected_user}")
-            new_messages = read_messages(num_messages)
+            new_messages = chat_client.read_messages(num_messages)
 
             # Store fetched messages separately
             st.session_state.chat_messages[selected_user].extend(new_messages)
@@ -71,7 +74,9 @@ def chat_view():
                 st.write(f"**{message['user']}**: {message['text']}")
             with col2:
                 if st.button("Delete", key=f"delete_{selected_user}_{index}"):
-                    logger.info(f"Deleting message at index {index} for user {selected_user}")
+                    logger.info(
+                        f"Deleting message at index {index} for user {selected_user}"
+                    )
                     messages.pop(index)
                     st.session_state.chat_messages[selected_user] = messages
                     st.rerun()
@@ -81,18 +86,21 @@ def chat_view():
 
         if st.button("Send"):
             if user_input:
-                logger.info(f"Sending message from {st.session_state.username} to {selected_user}")
-                
-                # Send the message to the server
-                response = send_message(selected_user, user_input)
-                print("send_message response", response)
+                logger.info(
+                    f"Sending message from {st.session_state.username} to {selected_user}"
+                )
+
+                # Send the message to the server using the persistent connection
+                response = chat_client.send_message(selected_user, user_input)
 
                 if response.get("status") == "success":
                     # Append the message to the local chat history
-                    st.session_state.chat_messages[selected_user].append({
-                        "user": st.session_state.username,
-                        "text": user_input
-                    })
+                    st.session_state.chat_messages[selected_user].append(
+                        {
+                            "user": st.session_state.username,
+                            "text": user_input,
+                        }
+                    )
                     logger.info("Message sent successfully")
                 else:
                     st.error("Failed to send message. Please try again.")
@@ -106,6 +114,7 @@ def chat_view():
     # Logout button
     if st.button("Logout"):
         logger.info(f"User {st.session_state.username} logged out")
+        chat_client.logout()  # Close connection properly
         st.session_state.authenticated = False
         st.session_state.username = None
         st.session_state.user_unread_pair = {}

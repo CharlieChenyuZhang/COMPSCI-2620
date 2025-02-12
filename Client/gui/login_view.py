@@ -1,7 +1,6 @@
 import streamlit as st
-import protocol_JSON
 import logging
-from constants import Actions, ResponseStatus, ResponseFields
+from protocol_JSON import chat_client  # Use persistent connection
 
 # Configure logging
 logging.basicConfig(
@@ -21,17 +20,17 @@ def login_view():
         
         if username and password:
             logger.info(f"Attempting to authenticate user: {username}")
-            response = protocol_JSON.login(username, password)
+            response = chat_client.login(username, password)
             logger.debug(f"Server response for login attempt by {username}: {response}")
             
-            if response.get(ResponseFields.STATUS) == ResponseStatus.SUCCESS:
+            if response.get("status") == "success":
                 logger.info(f"Successful login for user: {username}")
                 st.session_state.authenticated = True
                 st.session_state.username = username
                 st.rerun()
             else:
                 logger.warning(f"Failed login attempt for user: {username}")
-                st.error(response.get(ResponseFields.MESSAGE, "Invalid username or password."))
+                st.error(response.get("message", "Invalid username or password."))
         else:
             logger.warning("Login attempt with missing credentials")
             st.error("Please enter both username and password.")

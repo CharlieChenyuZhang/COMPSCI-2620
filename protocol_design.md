@@ -32,7 +32,7 @@ Response: {"status": "success", "unread_count": <count>} or {"status": "error", 
 
 List Accounts:
 Request: {"action": "list", "pattern": "<pattern>"}
-Response: {"status": "success", "accounts": ["<username1>", "<username2>", ...]}
+Response: {"status": "success", "accounts": ["<username1>: <unread_count>", "<username2>", ...]}
 
 Send Message:
 Request: {"action": "send", "recipient": "<recipient>", "message": "<message>"}

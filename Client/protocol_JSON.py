@@ -4,56 +4,83 @@ from utils import get_server_config
 
 server_host, server_port = get_server_config()
 
-def send_request(request):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((server_host, server_port))  # Use config values
-        s.sendall(json.dumps(request).encode('utf-8'))  # Send request
-        response = s.recv(1024)  # Receive response
-        return json.loads(response.decode('utf-8'))
+class ChatClient:
+    def __init__(self):
+        self.sock = None
+        self.connected = False
 
-def create_account(username, password):
-    request = {
-        "action": "create",
-        "username": username,
-        "password": password  # Assume password is already hashed
-    }
-    return send_request(request)
+    def connect(self):
+        """ Establish a connection to the chat server. """
+        if not self.connected:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.connect((server_host, server_port))
+            self.connected = True
 
-def login(username, password):
-    request = {
-        "action": "login",
-        "username": username,
-        "password": password  # Assume password is already hashed
-    }
-    return send_request(request)
+    def send_request(self, request):
+        """ Send a request to the server and receive a response. """
+        try:
+            if not self.connected:
+                self.connect()
 
-def send_message(recipient, message):
-    request = {
-        "action": "send",
-        "recipient": recipient,
-        "message": message
-    }
-    return send_request(request)
+            self.sock.sendall(json.dumps(request).encode('utf-8'))
+            response = self.sock.recv(4096)  # Increase buffer size for large messages
+            return json.loads(response.decode('utf-8'))
+        except Exception as e:
+            print(f"Error: {e}")
+            self.connected = False  # Reset connection status if an error occurs
+            return {"status": "error", "message": "Connection lost"}
 
-def read_messages(count):
-    request = {
-        "action": "read",
-        "count": count
-    }
-    response = send_request(request)
-    print("read_messages response", response)
-    return response.get("messages", [])
+    def create_account(self, username, password):
+        request = {
+            "action": "create",
+            "username": username,
+            "password": password
+        }
+        return self.send_request(request)
 
-def list_accounts(pattern="*"):
-    request = {
-        "action": "list",
-        "pattern": pattern
-    }
-    response = send_request(request)
-    print("response", response)
-    if response.get("status") == "success":
-        accounts = response.get("accounts", [])
-        # FIXME: use this when the server is ready
-        # return {account['username']: account['unread_count'] for account in accounts}
-        return {account: 10 for account in accounts}
-    return {}
+    def login(self, username, password):
+        request = {
+            "action": "login",
+            "username": username,
+            "password": password
+        }
+        response = self.send_request(request)
+        if response.get("status") == "success":
+            print(f"User {username} logged in successfully.")
+        return response
+
+    def send_message(self, recipient, message):
+        request = {
+            "action": "send",
+            "recipient": recipient,
+            "message": message
+        }
+        return self.send_request(request)
+
+    def read_messages(self, count):
+        request = {
+            "action": "load-unread",
+            "count": count
+        }
+        return self.send_request(request)
+
+    def list_accounts(self, pattern="*"):
+        request = {
+            "action": "list",
+            "pattern": pattern
+        }
+        response = self.send_request(request)
+        print("list_accounts response", response)
+        if response.get("status") == "success":
+            return response.get("accounts", [])
+        return {}
+
+    def logout(self):
+        """ Disconnect from the server. """
+        if self.connected:
+            self.sock.close()
+            self.connected = False
+            print("Disconnected from server.")
+
+# Create a shared instance of ChatClient
+chat_client = ChatClient()
