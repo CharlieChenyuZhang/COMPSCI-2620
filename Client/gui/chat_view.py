@@ -26,8 +26,7 @@ def chat_view():
     logger.info(f"{st.session_state.username} - Accounts fetched: {accounts}")
 
     # Ensure session state has necessary structures
-    if "user_unread_pair" not in st.session_state:
-        st.session_state.user_unread_pair = accounts  # Store unread counts
+    st.session_state.user_unread_pair = accounts  # Store unread counts
 
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = {}  # Store chat history per user
@@ -38,6 +37,7 @@ def chat_view():
         st.session_state.user_unread_pair = accounts
         st.rerun()
     
+    print("DEBUG ??? user_unread_pair", st.session_state.user_unread_pair)
     for each in st.session_state.user_unread_pair:
         user, unread_count = each['username'], each['unread_count']
         if st.sidebar.button(f"{user} ({unread_count} unread)"):
@@ -102,25 +102,27 @@ def chat_view():
             st.rerun()
 
         # Display chat messages
-        messages = st.session_state.chat_messages[selected_user]
-        print("XXX messages", messages)
-        print("XXX chat_messages", st.session_state.chat_messages)
-        for index, message in enumerate(messages):
-            print("XXX message", message)
-            col1, col2 = st.columns([0.8, 0.2])
-            with col1:
-                st.write(f"**{message['sender']}**: {message['message']}")
-            with col2:
-                if st.button("Delete", key=f"delete_{selected_user}_{index}"):
-                    logger.info(
-                        f"Deleting message at index {index} for user {selected_user}"
-                    )
-                    messages.pop(index)
-                    st.session_state.chat_messages[selected_user] = messages
-                    st.rerun()
+        print("DEBUG ??? selected_user", selected_user)
+        if selected_user:
+            messages = st.session_state.chat_messages[selected_user]
+            print("XXX messages", messages)
+            print("XXX chat_messages", st.session_state.chat_messages)
+            for index, message in enumerate(messages):
+                print("XXX message", message)
+                col1, col2 = st.columns([0.8, 0.2])
+                with col1:
+                    st.write(f"**{message['sender']}**: {message['message']}")
+                with col2:
+                    if st.button("Delete", key=f"delete_{selected_user}_{index}"):
+                        logger.info(
+                            f"Deleting message at index {index} for user {selected_user}"
+                        )
+                        messages.pop(index)
+                        st.session_state.chat_messages[selected_user] = messages
+                        st.rerun()
 
-        # Chat input
-        user_input = st.text_input("Type your message here...")
+            # Chat input
+            user_input = st.text_input("Type your message here...")
 
         if st.button("Send"):
             if user_input:
@@ -157,6 +159,9 @@ def chat_view():
         chat_client.logout()  # Close connection properly
         st.session_state.authenticated = False
         st.session_state.username = None
+        st.session_state.selected_user = None
+        st.session_state.unread_count = 0
+        st.session_state.chat_loaded = False
         st.session_state.user_unread_pair = {}
         st.session_state.chat_messages = {}
         st.rerun()
