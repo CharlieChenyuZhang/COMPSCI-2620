@@ -11,7 +11,7 @@ class ChatClient:
         self.connected = False
     def connect(self):
         if self.connected:
-            # self.disconnect()  # Ensure previous connection is closed
+            self.disconnect()  # Ensure previous connection is closed
             return
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((server_host, server_port))
