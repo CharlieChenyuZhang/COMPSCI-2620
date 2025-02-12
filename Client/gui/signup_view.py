@@ -1,6 +1,6 @@
 import streamlit as st
 import logging
-from protocol_JSON import chat_client  # Use persistent connection
+from protocol_JSON import ChatClient  # Use persistent connection
 
 # Configure logging
 logging.basicConfig(
@@ -9,7 +9,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def get_chat_client():
+    """Retrieve or initialize a chat client for each user session."""
+    if "chat_client" not in st.session_state:
+        st.session_state.chat_client = ChatClient()
+    return st.session_state.chat_client
+
 def signup_view():
+    chat_client = get_chat_client()
     """Handles user sign-up UI."""
     st.subheader("Create a New Account")
     

@@ -11,6 +11,7 @@ class ChatClient:
         self.connected = False
     def connect(self):
         if self.connected:
+            print("!!! Client disconnect a connection !!!")
             self.disconnect()  # Ensure previous connection is closed
             return
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -108,4 +109,4 @@ class ChatClient:
 
 
 # Create a shared instance of ChatClient
-chat_client = ChatClient()
+# chat_client = ChatClient()

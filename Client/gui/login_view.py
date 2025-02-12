@@ -1,6 +1,6 @@
 import streamlit as st
 import logging
-from protocol_JSON import chat_client  # Use persistent connection
+from protocol_JSON import ChatClient  # Use persistent connection
 
 # Configure logging
 logging.basicConfig(
@@ -8,6 +8,12 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+def get_chat_client():
+    """Retrieve or initialize a chat client for each user session."""
+    if "chat_client" not in st.session_state:
+        st.session_state.chat_client = ChatClient()
+    return st.session_state.chat_client
 
 def login_view():
     """Handles user login UI."""
@@ -20,6 +26,7 @@ def login_view():
         
         if username and password:
             logger.info(f"Attempting to authenticate user: {username}")
+            chat_client = get_chat_client()
             response = chat_client.login(username, password)
             logger.debug(f"Server response for login attempt by {username}: {response}")
             
