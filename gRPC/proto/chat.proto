@@ -2,86 +2,125 @@ syntax = "proto3";
 
 package chat;
 
-// The chat service definition.
 service ChatService {
+  // Account management
   rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
-  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
-  rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse);
   rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
-  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+  rpc DeleteAccount(DeleteAccountRequest) returns (StatusResponse);
+
+  // Message operations 
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc LoadUnreadMessages(LoadMessagesRequest) returns (LoadMessagesResponse);
+  rpc DeleteMessage(DeleteMessageRequest) returns (StatusResponse);
+
+  // Real-time notifications
+  rpc SubscribeToUpdates(SubscribeRequest) returns (stream UpdateNotification);
 }
 
-// The request message containing the user's account details.
 message CreateAccountRequest {
   string username = 1;
   string password = 2;
 }
 
-// The response message for account creation.
 message CreateAccountResponse {
-  string status = 1;
+  bool success = 1;
   string message = 2;
+  int32 unread_count = 3;
 }
 
-// The request message for login.
 message LoginRequest {
   string username = 1;
   string password = 2;
 }
 
-// The response message for login.
 message LoginResponse {
-  string status = 1;
+  bool success = 1;
   string message = 2;
+  map<string, int32> unread_counts = 3;  // Maps usernames to their unread counts
+  string session_id = 4;
 }
 
-// The request message for sending a message.
+message ListAccountsRequest {
+  string pattern = 1;
+  string username = 2;  // Username of requester
+}
+
+message ListAccountsResponse {
+  repeated AccountInfo accounts = 1;
+}
+
+message AccountInfo {
+  string username = 1;
+  int32 unread_count = 2;
+}
+
 message SendMessageRequest {
-  string recipient = 1;
-  string message = 2;
+  string sender = 1;
+  string recipient = 2;
+  string content = 3;
 }
 
-// The response message for sending a message.
 message SendMessageResponse {
-  string status = 1;
+  bool success = 1;
   string message = 2;
+  int64 message_id = 3;
 }
 
-// The request message for reading messages.
-message ReadMessagesRequest {
-  int32 count = 1;
+message LoadMessagesRequest {
+  string username = 1;
+  string other_user = 2;  // Optional: for loading messages with specific user
 }
 
-// The response message for reading messages.
-message ReadMessagesResponse {
+message LoadMessagesResponse {
   repeated Message messages = 1;
 }
 
-// The message structure.
 message Message {
-  string sender = 1;
-  string content = 2;
+  int64 id = 1;
+  string sender = 2;
+  string content = 3;
+  string timestamp = 4;
 }
 
-// The request message for listing accounts.
-message ListAccountsRequest {
-  string pattern = 1;
+message DeleteMessageRequest {
+  int64 message_id = 1;
+  string username = 2;  // For authorization
 }
 
-// The response message for listing accounts.
-message ListAccountsResponse {
-  repeated string accounts = 1;
-}
-
-// The request message for deleting an account.
 message DeleteAccountRequest {
   string username = 1;
   string password = 2;
 }
 
-// The response message for deleting an account.
-message DeleteAccountResponse {
-  string status = 1;
+message StatusResponse {
+  bool success = 1;
   string message = 2;
+}
+
+message SubscribeRequest {
+  string username = 1;
+}
+
+message UpdateNotification {
+  oneof update {
+    MessageReceived message_received = 1;
+    MessageDeleted message_deleted = 2;
+    AccountDeleted account_deleted = 3;
+  }
+}
+
+message MessageReceived {
+  int64 message_id = 1;
+  string sender = 2;
+  string content = 3;
+  string timestamp = 4;
+}
+
+message MessageDeleted {
+  int64 message_id = 1;
+}
+
+message AccountDeleted {
+  string username = 1;
 }
