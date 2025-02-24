@@ -5,6 +5,12 @@ from datetime import datetime
 import logging
 import re
 from typing import Dict
+import sys
+import os
+
+# Add Server directory to Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Server'))
+
 import chat_pb2
 import chat_pb2_grpc
 from db_manager import DatabaseManager
