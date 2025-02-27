@@ -16,17 +16,62 @@ def get_chat_client():
     return st.session_state.chat_client
 
 def chat_view():
+    """Chat interface after successful login."""
+    st.title(f"Welcome {st.session_state.username}!")
+    
+    # Initialize message storage in session state if not exists
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    
+    # Get or initialize chat client
     chat_client = get_chat_client()
     
-    st.sidebar.success(f"Logged in as {st.session_state.username}")
-
+    # Check authentication status
+    if not hasattr(chat_client, 'session_id') or not chat_client.session_id:
+        logger.error("User not properly authenticated")
+        st.error("You are not properly logged in. Please return to the login page.")
+        if st.button("Return to Login"):
+            st.session_state.authenticated = False
+            st.rerun()
+        return  # Exit the chat view function
+    
+    try:
+        # Start subscription if not already started
+        if (not hasattr(chat_client, '_subscription_thread') or 
+            not chat_client._subscription_thread or 
+            not chat_client._subscription_thread.is_alive()):
+            
+            # Ensure username is in session state before starting subscription
+            if st.session_state.username:
+                chat_client.subscribe_to_updates()
+            else:
+                logger.error("Username not found in session state")
+                st.error("Session error. Please try logging out and back in.")
+                
+    except Exception as e:
+        logger.error(f"Error starting subscription: {e}")
+        st.error("Error connecting to chat service. Please try logging out and back in.")
+    
+    # Logout button
+    if st.sidebar.button("Logout"):
+        chat_client.logout()
+        st.session_state.authenticated = False
+        st.session_state.username = None
+        st.session_state.messages = []
+        st.rerun()
+    
     # Fetch and display the list of accounts with unread counts
     logger.info("Fetching list of accounts")
     accounts = chat_client.list_accounts(username=st.session_state.username)
     logger.info(f"{st.session_state.username} - Accounts fetched: {accounts}")
 
-    # Ensure session state has necessary structures
-    st.session_state.user_unread_pair = accounts  # Store unread counts
+    # Ensure user_unread_pair is always a list
+    if isinstance(accounts, dict) and 'status' in accounts and accounts['status'] == 'error':
+        logger.error(f"Error fetching accounts: {accounts['message']}")
+        st.error(f"Error loading contacts: {accounts['message']}")
+        st.session_state.user_unread_pair = []  # Initialize as empty list
+    else:
+        st.session_state.user_unread_pair = accounts  # Store unread counts
 
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = {}  # Store chat history per user
@@ -34,20 +79,28 @@ def chat_view():
     st.sidebar.subheader("Select a user to chat with")
     if st.sidebar.button("Reload"):
         accounts = chat_client.list_accounts(username=st.session_state.username)
-        st.session_state.user_unread_pair = accounts
+        logger.info(f"{st.session_state.username} - Reloaded accounts: {accounts}")
+        if isinstance(accounts, dict) and 'status' in accounts and accounts['status'] == 'error':
+            logger.error(f"Error reloading accounts: {accounts['message']}")
+            st.sidebar.error(f"Error: {accounts['message']}")
+            st.session_state.user_unread_pair = []
+        else:
+            st.session_state.user_unread_pair = accounts
         st.rerun()
     
+    print(st.session_state)
     for each in st.session_state.user_unread_pair:
-        user, unread_count = each['username'], each['unread_count']
-        if st.sidebar.button(f"{user} ({unread_count} unread)"):
-            logger.info(f"{st.session_state.username} - User selected to chat with: {user}")
-            st.session_state.selected_user = user
-            st.session_state.unread_count = unread_count
-            st.session_state.chat_loaded = False
+        if isinstance(each, dict) and 'username' in each and 'unread_count' in each:
+            user, unread_count = each['username'], each['unread_count']
+            if st.sidebar.button(f"{user} ({unread_count} unread)"):
+                logger.info(f"{st.session_state.username} - User selected to chat with: {user}")
+                st.session_state.selected_user = user
+                st.session_state.unread_count = unread_count
+                st.session_state.chat_loaded = False
 
-            # Ensure message history is initialized
-            if user not in st.session_state.chat_messages:
-                st.session_state.chat_messages[user] = []
+                # Ensure message history is initialized
+                if user not in st.session_state.chat_messages:
+                    st.session_state.chat_messages[user] = []
 
     selected_user = st.session_state.get("selected_user", None)
 
@@ -126,19 +179,6 @@ def chat_view():
         logger.info("No user selected for chat")
         st.write("Please select a user from the sidebar to start chatting.")
 
-    # Logout button
-    if st.button("Logout"):
-        logger.info(f"{st.session_state.username} - User {st.session_state.username} logged out")
-        chat_client.logout()  # Close connection properly
-        st.session_state.authenticated = False
-        st.session_state.username = None
-        st.session_state.selected_user = None
-        st.session_state.unread_count = 0
-        st.session_state.chat_loaded = False
-        st.session_state.user_unread_pair = {}
-        st.session_state.chat_messages = {}
-        st.rerun()
-
     # Delete account button
     st.markdown("---")
     st.subheader("Delete Your Account")
@@ -157,4 +197,10 @@ def chat_view():
             st.session_state.user_unread_pair = {}
             st.session_state.chat_messages = {}
             st.rerun()
+            
+    # Display messages from session state
+    if st.session_state.messages:
+        for msg in st.session_state.messages:
+            st.write(f"{msg['sender']}: {msg['content']}")
+
             

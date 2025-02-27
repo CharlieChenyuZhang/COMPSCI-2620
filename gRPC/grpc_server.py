@@ -4,7 +4,9 @@ import bcrypt
 from datetime import datetime
 import logging
 import re
-from typing import Dict
+import time
+import uuid
+from typing import Dict, List
 import sys
 import os
 
@@ -15,26 +17,34 @@ import chat_pb2
 import chat_pb2_grpc
 from db_manager import DatabaseManager
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class ChatServicer(chat_pb2_grpc.ChatServiceServicer):
     def __init__(self):
         self.db = DatabaseManager()
         self.active_subscribers: Dict[str, grpc.ServicerContext] = {}
-        self.user_sessions: Dict[str, str] = {}  # username to session_id mapping
+        self.user_sessions: Dict[str, str] = {}  # session_id to username mapping
         
     def _authenticate(self, context) -> str:
         """Authenticate user from metadata"""
-        metadata = dict(context.invocation_metadata())
-        session_id = metadata.get('session_id')
-        if not session_id:
-            context.abort(grpc.StatusCode.UNAUTHENTICATED, 'Missing session ID')
-        
-        username = next(
-            (user for user, sid in self.user_sessions.items() if sid == session_id),
-            None
-        )
-        if not username:
-            context.abort(grpc.StatusCode.UNAUTHENTICATED, 'Invalid session')
-        return username
+        try:
+            metadata = dict(context.invocation_metadata())
+            session_id = metadata.get('session_id')
+            if not session_id:
+                logging.error("Missing session ID in request")
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, 'Missing session ID')
+            
+            username = self.user_sessions.get(session_id)
+            if not username:
+                logging.error(f"Invalid session ID: {session_id}")
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, 'Invalid session')
+            logging.info(f"Successfully authenticated user: {username}")
+            return username
+        except Exception as e:
+            logging.error(f"Authentication error: {e}")
+            context.abort(grpc.StatusCode.INTERNAL, 'Authentication error')
 
     def CreateAccount(self, request, context):
         if self.db.account_exists(request.username):
@@ -74,9 +84,9 @@ class ChatServicer(chat_pb2_grpc.ChatServiceServicer):
                 message="Incorrect password"
             )
             
-        # Store session
-        session_id = context.peer()
-        self.user_sessions[request.username] = session_id
+        # Generate a unique session ID
+        session_id = str(uuid.uuid4())
+        self.user_sessions[session_id] = request.username
         
         # Get unread counts per user
         unread_counts = {}
@@ -149,14 +159,9 @@ class ChatServicer(chat_pb2_grpc.ChatServiceServicer):
                 message="Failed to store message"
             )
             
-        # If both parties are online, mark as read and notify
-        if (request.recipient in self.active_subscribers and 
-            request.sender in self.active_subscribers):
+        # If recipient is subscribed, send them the message notification
+        if request.recipient in self.active_subscribers:
             try:
-                # Mark as read immediately
-                self.db.mark_message_read(message_id)
-                
-                # Send notification
                 notification = chat_pb2.UpdateNotification(
                     message_received=chat_pb2.MessageReceived(
                         message_id=message_id,
@@ -166,9 +171,10 @@ class ChatServicer(chat_pb2_grpc.ChatServiceServicer):
                     )
                 )
                 self.active_subscribers[request.recipient].send(notification)
-            except Exception:
-                # If notification fails, keep message unread
-                pass
+                # Mark as read since recipient is online
+                self.db.mark_message_read(message_id)
+            except Exception as e:
+                logging.error(f"Failed to send notification: {e}")
         
         return chat_pb2.SendMessageResponse(
             success=True,
@@ -247,8 +253,9 @@ class ChatServicer(chat_pb2_grpc.ChatServiceServicer):
         self.db.delete_account(request.username)
         
         # Remove session
-        if username in self.user_sessions:
-            del self.user_sessions[username]
+        session_ids_to_remove = [sid for sid, uname in self.user_sessions.items() if uname == username]
+        for sid in session_ids_to_remove:
+            del self.user_sessions[sid]
         
         # Notify all subscribers
         notification = chat_pb2.UpdateNotification(
@@ -269,25 +276,54 @@ class ChatServicer(chat_pb2_grpc.ChatServiceServicer):
         )
 
     def SubscribeToUpdates(self, request, context):
-        # Authenticate user
-        username = self._authenticate(context)
-        if username != request.username:
-            context.abort(grpc.StatusCode.PERMISSION_DENIED, "Not authorized")
-            
-        self.active_subscribers[username] = context
-        
+        """Handle subscription requests"""
         try:
-            while context.is_active():
-                # Keep connection alive until client disconnects
-                context.sleep(1)
-        except Exception:
-            pass
-        finally:
-            if username in self.active_subscribers:
-                del self.active_subscribers[username]
-                # Clean up session if user disconnects
-                if username in self.user_sessions:
-                    del self.user_sessions[username]
+            # Authenticate user
+            username = self._authenticate(context)
+            logging.info(f"Subscribe request from {username}")
+            
+            # Verify the username matches the authenticated user
+            if username != request.username:
+                logging.error(f"Username mismatch: {username} != {request.username}")
+                context.abort(grpc.StatusCode.PERMISSION_DENIED, "Not authorized")
+            
+            # Store the subscriber
+            self.active_subscribers[username] = context
+            logging.info(f"Added subscriber: {username}")
+            
+            # Create a notification queue for this user
+            notification_queue = []
+            
+            try:
+                # Keep connection alive and handle new notifications
+                while context.is_active():
+                    # Sleep briefly to prevent busy waiting
+                    time.sleep(1)
+                    
+                    # Check for new notifications and yield them
+                    while notification_queue:
+                        yield notification_queue.pop(0)
+                    
+                    # Yield a heartbeat message to keep the connection alive
+                    yield chat_pb2.UpdateNotification()
+                
+            except Exception as e:
+                logging.error(f"Subscription error for {username}: {e}")
+            finally:
+                # Clean up
+                if username in self.active_subscribers:
+                    del self.active_subscribers[username]
+                    logging.info(f"Removed subscriber: {username}")
+                # Clean up session if disconnected (but don't remove all user sessions)
+                metadata = dict(context.invocation_metadata())
+                session_id = metadata.get('session_id')
+                if session_id and session_id in self.user_sessions:
+                    del self.user_sessions[session_id]
+                    logging.info(f"Cleaned up session for: {username}")
+                
+        except Exception as e:
+            logging.error(f"Error in SubscribeToUpdates: {e}")
+            raise
 
 def serve(port=50051):
     server = grpc.server(
