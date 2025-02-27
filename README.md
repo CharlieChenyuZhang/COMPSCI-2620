@@ -42,6 +42,25 @@ run this command to regenerate chat_pb2_grpc.py and chat_pb2.py and remember to 
 `cd gRPC`
 `python grpc_server.py`
 
+## how to run test cases in gRPC implementation
+
+`cd gRPC/tests`
+`python -m unittest test_client`
+`python -m unittest test_server`
+
+Then, you will see something like this
+
+```
+❯ python -m unittest test_client
+......INFO:grpc_client:Logging out and cleaning up
+INFO:grpc_client:Stopping subscription thread
+...
+----------------------------------------------------------------------
+Ran 9 tests in 0.007s
+
+OK
+```
+
 ## Screenshot
 
 ### log in view
