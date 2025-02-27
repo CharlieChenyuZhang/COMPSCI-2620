@@ -11,7 +11,13 @@ logger = logging.getLogger(__name__)
 
 def get_chat_client():
     """Retrieve or initialize a chat client for each user session."""
-    if "chat_client" not in st.session_state:
+    try:
+        if ("chat_client" not in st.session_state or 
+            not hasattr(st.session_state.chat_client, '_is_channel_active') or 
+            not st.session_state.chat_client._is_channel_active):
+            st.session_state.chat_client = ChatClient()
+    except Exception:
+        # If anything goes wrong, create a new client
         st.session_state.chat_client = ChatClient()
     return st.session_state.chat_client
 

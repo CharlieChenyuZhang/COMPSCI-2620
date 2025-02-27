@@ -6,9 +6,22 @@ import streamlit as st
 
 class ChatClient:
     def __init__(self, host='localhost', port=50051):
-        self.channel = grpc.insecure_channel(f'{host}:{port}')
-        self.stub = chat_pb2_grpc.ChatServiceStub(self.channel)
+        self._host = host
+        self._port = port
+        self._create_channel()
         self.session_id: Optional[str] = None
+        self._is_channel_active = True
+
+    def _create_channel(self):
+        """Create a new gRPC channel and stub"""
+        self.channel = grpc.insecure_channel(f'{self._host}:{self._port}')
+        self.stub = chat_pb2_grpc.ChatServiceStub(self.channel)
+        self._is_channel_active = True
+
+    def _ensure_channel(self):
+        """Ensure channel is active, recreate if needed"""
+        if not self._is_channel_active:
+            self._create_channel()
 
     def _add_session_metadata(self) -> Optional[list]:
         return [('session_id', self.session_id)] if self.session_id else None
@@ -22,6 +35,7 @@ class ChatClient:
             return {'status': 'error', 'message': str(e)}
 
     def login(self, username: str, password: str) -> Dict:
+        self._ensure_channel()
         request = chat_pb2.LoginRequest(username=username, password=password)
         try:
             response = self.stub.Login(request)
@@ -83,5 +97,9 @@ class ChatClient:
 
     def logout(self):
         """Close the gRPC channel."""
-        self.channel.close()
+        try:
+            self.channel.close()
+        except:
+            pass
+        self._is_channel_active = False
         self.session_id = None
