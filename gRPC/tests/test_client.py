@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import sys
 import os
 import grpc
+import logging
 
 # Add the parent directory to the path so we can import the client
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -188,6 +189,85 @@ class TestChatClient(unittest.TestCase):
         # Check that session_id was cleared
         self.assertIsNone(self.client.session_id)
         self.assertFalse(self.client._is_channel_active)
+        
+    def test_payload_sizes(self):
+        """Test and compare payload sizes between gRPC and equivalent JSON"""
+        
+        # Test case 1: Account Creation
+        grpc_request = chat_pb2.CreateAccountRequest(
+            username="testuser",
+            password="testpass"
+        )
+        json_payload = {
+            "action": "create",
+            "username": "testuser",
+            "password": "testpass"
+        }
+        
+        grpc_size = len(grpc_request.SerializeToString())
+        json_size = len(str(json_payload).encode('utf-8'))
+        
+        # Test case 2: Send Message with longer content
+        message_content = "Hello, this is a test message with some typical content!"
+        grpc_msg_request = chat_pb2.SendMessageRequest(
+            sender="testuser",
+            recipient="recipient",
+            content=message_content
+        )
+        json_msg_payload = {
+            "action": "send",
+            "sender": "testuser",
+            "recipient": "recipient",
+            "message": message_content
+        }
+        
+        grpc_msg_size = len(grpc_msg_request.SerializeToString())
+        json_msg_size = len(str(json_msg_payload).encode('utf-8'))
+        
+        # Test case 3: List Accounts with multiple accounts
+        account_list = [
+            chat_pb2.AccountInfo(username="user1", unread_count=5),
+            chat_pb2.AccountInfo(username="user2", unread_count=3),
+            chat_pb2.AccountInfo(username="user3", unread_count=0)
+        ]
+        grpc_list_response = chat_pb2.ListAccountsResponse(accounts=account_list)
+        
+        json_list_payload = {
+            "status": "success",
+            "accounts": [
+                {"username": "user1", "unread_count": 5},
+                {"username": "user2", "unread_count": 3},
+                {"username": "user3", "unread_count": 0}
+            ]
+        }
+        
+        grpc_list_size = len(grpc_list_response.SerializeToString())
+        json_list_size = len(str(json_list_payload).encode('utf-8'))
+        
+        # Log and assert results
+        logging.info(f"""
+        Payload Size Comparison:
+        
+        1. Account Creation:
+        gRPC: {grpc_size} bytes
+        JSON: {json_size} bytes
+        Difference: {json_size - grpc_size} bytes ({(json_size/grpc_size - 1)*100:.1f}% larger)
+        
+        2. Send Message:
+        gRPC: {grpc_msg_size} bytes
+        JSON: {json_msg_size} bytes
+        Difference: {json_msg_size - grpc_msg_size} bytes ({(json_msg_size/grpc_msg_size - 1)*100:.1f}% larger)
+        
+        3. List Accounts:
+        gRPC: {grpc_list_size} bytes
+        JSON: {json_list_size} bytes
+        Difference: {json_list_size - grpc_list_size} bytes ({(json_list_size/grpc_list_size - 1)*100:.1f}% larger)
+        """)
+        
+        # Assert that gRPC payloads are smaller
+        self.assertLess(grpc_size, json_size, "gRPC payload should be smaller for account creation")
+        self.assertLess(grpc_msg_size, json_msg_size, "gRPC payload should be smaller for sending messages")
+        self.assertLess(grpc_list_size, json_list_size, "gRPC payload should be smaller for listing accounts")
 
 if __name__ == '__main__':
     unittest.main()

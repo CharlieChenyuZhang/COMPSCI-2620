@@ -102,12 +102,28 @@ message SubscribeRequest {
   string username = 1;
 }
 
+message ReadMessagesRequest {
+    string username = 1;
+    string recipient = 2; 
+    int32 count = 3; 
+}
+
+message UserOnline {
+    string username = 1;
+}
+
+message UserOffline {
+    string username = 1;
+}
+
 message UpdateNotification {
-  oneof update {
-    MessageReceived message_received = 1;
-    MessageDeleted message_deleted = 2;
-    AccountDeleted account_deleted = 3;
-  }
+    oneof update {
+        MessageReceived message_received = 1;
+        MessageDeleted message_deleted = 2;
+        AccountDeleted account_deleted = 3;
+        UserOnline user_online = 4;
+        UserOffline user_offline = 5;
+    }
 }
 
 message MessageReceived {
