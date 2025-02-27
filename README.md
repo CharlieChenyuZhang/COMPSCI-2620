@@ -61,6 +61,22 @@ Ran 9 tests in 0.007s
 OK
 ```
 
+or this for the server
+
+```
+❯ python -m unittest test_server
+ERROR:root:Invalid session ID: invalid-session-id
+ERROR:root:Authentication error: StatusCode.UNAUTHENTICATED: Invalid session
+.ERROR:root:Missing session ID in request
+ERROR:root:Authentication error: StatusCode.UNAUTHENTICATED: Missing session ID
+.INFO:root:Successfully authenticated user: testuser
+.......
+----------------------------------------------------------------------
+Ran 9 tests in 0.297s
+
+OK
+```
+
 ## Screenshot
 
 ### log in view
