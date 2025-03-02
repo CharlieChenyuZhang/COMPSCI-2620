@@ -94,3 +94,37 @@ OK
 ### after selecting a user to chat
 
 <img width="849" alt="Screenshot 2025-02-12 at 11 55 10 AM" src="https://github.com/user-attachments/assets/70f1c06f-8a4b-4ea0-a3b3-c87fc573d56d" />
+
+# Design Exercise 3
+
+## how to run
+
+1.  Simulation Mode (Multiple VMs in One Process)
+    If you run the script without any command-line arguments, it will start a simulation with three virtual machines. Each machine will bind to a unique port (10000, 10001, 10002) and run concurrently in separate threads.
+
+        `python distributed_system.py`
+
+2.  Standalone Mode (Run Each VM Separately)
+
+    ```
+    python distributed_system.py <vm_id> <port> <other_vm_info...>
+    ```
+
+    e.g.
+    For VM 0:
+
+    ```
+    python distributed_system.py 0 10000 1:127.0.0.1:10001 2:127.0.0.1:10002
+    ```
+
+    For VM 1:
+
+    ```
+    python distributed_system.py 1 10001 0:127.0.0.1:10000 2:127.0.0.1:10002
+    ```
+
+    For VM 2:
+
+    ```
+    python distributed_system.py 2 10002 0:127.0.0.1:10000 1:127.0.0.1:10001
+    ```
