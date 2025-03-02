@@ -97,7 +97,11 @@ OK
 
 # Design Exercise 3
 
-## how to run
+There are 2 files.
+
+## how to run - distributed_system.py
+
+This file save the log files for each of the VMs to the current folder.
 
 1.  Simulation Mode (Multiple VMs in One Process)
     If you run the script without any command-line arguments, it will start a simulation with three virtual machines. Each machine will bind to a unique port (10000, 10001, 10002) and run concurrently in separate threads.
@@ -128,3 +132,17 @@ OK
     ```
     python distributed_system.py 2 10002 0:127.0.0.1:10000 1:127.0.0.1:10001
     ```
+
+distributed_system.py -- This file save the log files for each of the VMs to the current folder.
+
+## how to run - vm.py
+
+This file generates 5 runs per experiment and put it to the experiment*{exp_id}\_run*{run_id} accordingly.
+
+```
+python vm.py --experiment=2 --run=3      (runs experiment 2, run 3)
+```
+
+```
+python vm.py --experiment=1 --batch      (runs experiment 1 five times)
+```
