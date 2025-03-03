@@ -1,0 +1,390 @@
+2025-03-01 21:27:56 - INTERNAL Internal event | Logical clock: 1
+2025-03-01 21:27:56 - SEND to VM 1 | Logical clock: 2
+2025-03-01 21:27:57 - SEND to VM 2 | Logical clock: 3
+2025-03-01 21:27:57 - INTERNAL Internal event | Logical clock: 4
+2025-03-01 21:27:57 - SEND to VM 2 | Logical clock: 5
+2025-03-01 21:27:57 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 6
+2025-03-01 21:27:57 - SEND to VM 1 | Logical clock: 7
+2025-03-01 21:27:57 - SEND to VM 1 | Logical clock: 8
+2025-03-01 21:27:58 - INTERNAL Internal event | Logical clock: 9
+2025-03-01 21:27:58 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 10
+2025-03-01 21:27:58 - INTERNAL Internal event | Logical clock: 11
+2025-03-01 21:27:58 - INTERNAL Internal event | Logical clock: 12
+2025-03-01 21:27:58 - SEND to VM 2 | Logical clock: 13
+2025-03-01 21:27:58 - INTERNAL Internal event | Logical clock: 14
+2025-03-01 21:27:59 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 15
+2025-03-01 21:27:59 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 16
+2025-03-01 21:27:59 - SEND to VM 2 | Logical clock: 17
+2025-03-01 21:27:59 - SEND to VM 1 | Logical clock: 18
+2025-03-01 21:27:59 - SEND to VM 2 | Logical clock: 19
+2025-03-01 21:27:59 - SEND to VM 1 | Logical clock: 20
+2025-03-01 21:27:59 - SEND to VM 2 | Logical clock: 21
+2025-03-01 21:27:59 - INTERNAL Internal event | Logical clock: 22
+2025-03-01 21:28:00 - SEND to VM 1 | Logical clock: 23
+2025-03-01 21:28:00 - SEND to VM 2 | Logical clock: 24
+2025-03-01 21:28:00 - SEND to VM 1 | Logical clock: 25
+2025-03-01 21:28:00 - SEND to VM 2 | Logical clock: 26
+2025-03-01 21:28:00 - SEND to VM 2 | Logical clock: 27
+2025-03-01 21:28:00 - INTERNAL Internal event | Logical clock: 28
+2025-03-01 21:28:00 - SEND to VM 1 | Logical clock: 29
+2025-03-01 21:28:00 - SEND to VM 2 | Logical clock: 30
+2025-03-01 21:28:00 - SEND to VM 1 | Logical clock: 31
+2025-03-01 21:28:00 - SEND to VM 2 | Logical clock: 32
+2025-03-01 21:28:01 - INTERNAL Internal event | Logical clock: 33
+2025-03-01 21:28:01 - INTERNAL Internal event | Logical clock: 34
+2025-03-01 21:28:01 - INTERNAL Internal event | Logical clock: 35
+2025-03-01 21:28:01 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 37
+2025-03-01 21:28:01 - INTERNAL Internal event | Logical clock: 38
+2025-03-01 21:28:01 - SEND to VM 1 | Logical clock: 39
+2025-03-01 21:28:01 - SEND to VM 2 | Logical clock: 40
+2025-03-01 21:28:02 - SEND to VM 2 | Logical clock: 41
+2025-03-01 21:28:02 - INTERNAL Internal event | Logical clock: 42
+2025-03-01 21:28:02 - INTERNAL Internal event | Logical clock: 43
+2025-03-01 21:28:02 - SEND to VM 1 | Logical clock: 44
+2025-03-01 21:28:02 - SEND to VM 2 | Logical clock: 45
+2025-03-01 21:28:02 - SEND to VM 1 | Logical clock: 46
+2025-03-01 21:28:03 - INTERNAL Internal event | Logical clock: 47
+2025-03-01 21:28:03 - SEND to VM 2 | Logical clock: 48
+2025-03-01 21:28:03 - SEND to VM 2 | Logical clock: 49
+2025-03-01 21:28:03 - SEND to VM 1 | Logical clock: 50
+2025-03-01 21:28:03 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 52
+2025-03-01 21:28:03 - INTERNAL Internal event | Logical clock: 53
+2025-03-01 21:28:04 - SEND to VM 1 | Logical clock: 54
+2025-03-01 21:28:04 - SEND to VM 2 | Logical clock: 55
+2025-03-01 21:28:04 - INTERNAL Internal event | Logical clock: 56
+2025-03-01 21:28:04 - INTERNAL Internal event | Logical clock: 57
+2025-03-01 21:28:04 - SEND to VM 1 | Logical clock: 58
+2025-03-01 21:28:04 - SEND to VM 2 | Logical clock: 59
+2025-03-01 21:28:04 - SEND to VM 1 | Logical clock: 60
+2025-03-01 21:28:04 - SEND to VM 2 | Logical clock: 61
+2025-03-01 21:28:05 - INTERNAL Internal event | Logical clock: 62
+2025-03-01 21:28:05 - SEND to VM 2 | Logical clock: 63
+2025-03-01 21:28:05 - SEND to VM 1 | Logical clock: 64
+2025-03-01 21:28:05 - SEND to VM 2 | Logical clock: 65
+2025-03-01 21:28:05 - INTERNAL Internal event | Logical clock: 66
+2025-03-01 21:28:05 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 68
+2025-03-01 21:28:05 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 70
+2025-03-01 21:28:06 - INTERNAL Internal event | Logical clock: 71
+2025-03-01 21:28:06 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 72
+2025-03-01 21:28:06 - SEND to VM 2 | Logical clock: 73
+2025-03-01 21:28:06 - INTERNAL Internal event | Logical clock: 74
+2025-03-01 21:28:06 - INTERNAL Internal event | Logical clock: 75
+2025-03-01 21:28:06 - INTERNAL Internal event | Logical clock: 76
+2025-03-01 21:28:07 - INTERNAL Internal event | Logical clock: 77
+2025-03-01 21:28:07 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 78
+2025-03-01 21:28:07 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 80
+2025-03-01 21:28:07 - SEND to VM 1 | Logical clock: 81
+2025-03-01 21:28:07 - SEND to VM 2 | Logical clock: 82
+2025-03-01 21:28:07 - INTERNAL Internal event | Logical clock: 83
+2025-03-01 21:28:07 - SEND to VM 1 | Logical clock: 84
+2025-03-01 21:28:08 - SEND to VM 2 | Logical clock: 85
+2025-03-01 21:28:08 - INTERNAL Internal event | Logical clock: 86
+2025-03-01 21:28:08 - INTERNAL Internal event | Logical clock: 87
+2025-03-01 21:28:08 - SEND to VM 1 | Logical clock: 88
+2025-03-01 21:28:08 - SEND to VM 2 | Logical clock: 89
+2025-03-01 21:28:08 - INTERNAL Internal event | Logical clock: 90
+2025-03-01 21:28:08 - SEND to VM 1 | Logical clock: 91
+2025-03-01 21:28:08 - SEND to VM 2 | Logical clock: 92
+2025-03-01 21:28:09 - SEND to VM 2 | Logical clock: 93
+2025-03-01 21:28:09 - INTERNAL Internal event | Logical clock: 94
+2025-03-01 21:28:09 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 95
+2025-03-01 21:28:09 - INTERNAL Internal event | Logical clock: 96
+2025-03-01 21:28:09 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 97
+2025-03-01 21:28:09 - SEND to VM 2 | Logical clock: 98
+2025-03-01 21:28:10 - INTERNAL Internal event | Logical clock: 99
+2025-03-01 21:28:10 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 100
+2025-03-01 21:28:10 - INTERNAL Internal event | Logical clock: 101
+2025-03-01 21:28:10 - SEND to VM 1 | Logical clock: 102
+2025-03-01 21:28:10 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 103
+2025-03-01 21:28:11 - INTERNAL Internal event | Logical clock: 104
+2025-03-01 21:28:11 - INTERNAL Internal event | Logical clock: 105
+2025-03-01 21:28:11 - INTERNAL Internal event | Logical clock: 106
+2025-03-01 21:28:11 - SEND to VM 1 | Logical clock: 107
+2025-03-01 21:28:11 - SEND to VM 2 | Logical clock: 108
+2025-03-01 21:28:11 - INTERNAL Internal event | Logical clock: 109
+2025-03-01 21:28:11 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 111
+2025-03-01 21:28:12 - SEND to VM 1 | Logical clock: 112
+2025-03-01 21:28:12 - SEND to VM 2 | Logical clock: 113
+2025-03-01 21:28:12 - SEND to VM 1 | Logical clock: 114
+2025-03-01 21:28:12 - SEND to VM 2 | Logical clock: 115
+2025-03-01 21:28:12 - SEND to VM 1 | Logical clock: 116
+2025-03-01 21:28:12 - SEND to VM 2 | Logical clock: 117
+2025-03-01 21:28:12 - INTERNAL Internal event | Logical clock: 118
+2025-03-01 21:28:12 - SEND to VM 2 | Logical clock: 119
+2025-03-01 21:28:12 - SEND to VM 2 | Logical clock: 120
+2025-03-01 21:28:13 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 121
+2025-03-01 21:28:13 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 122
+2025-03-01 21:28:13 - SEND to VM 2 | Logical clock: 123
+2025-03-01 21:28:13 - INTERNAL Internal event | Logical clock: 124
+2025-03-01 21:28:13 - SEND to VM 1 | Logical clock: 125
+2025-03-01 21:28:13 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 126
+2025-03-01 21:28:14 - INTERNAL Internal event | Logical clock: 127
+2025-03-01 21:28:14 - INTERNAL Internal event | Logical clock: 128
+2025-03-01 21:28:14 - INTERNAL Internal event | Logical clock: 129
+2025-03-01 21:28:14 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 130
+2025-03-01 21:28:14 - INTERNAL Internal event | Logical clock: 131
+2025-03-01 21:28:14 - INTERNAL Internal event | Logical clock: 132
+2025-03-01 21:28:15 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 134
+2025-03-01 21:28:15 - INTERNAL Internal event | Logical clock: 135
+2025-03-01 21:28:15 - INTERNAL Internal event | Logical clock: 136
+2025-03-01 21:28:15 - SEND to VM 2 | Logical clock: 137
+2025-03-01 21:28:15 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 140
+2025-03-01 21:28:15 - SEND to VM 1 | Logical clock: 141
+2025-03-01 21:28:16 - INTERNAL Internal event | Logical clock: 142
+2025-03-01 21:28:16 - INTERNAL Internal event | Logical clock: 143
+2025-03-01 21:28:16 - SEND to VM 1 | Logical clock: 144
+2025-03-01 21:28:16 - INTERNAL Internal event | Logical clock: 145
+2025-03-01 21:28:16 - SEND to VM 1 | Logical clock: 146
+2025-03-01 21:28:16 - INTERNAL Internal event | Logical clock: 147
+2025-03-01 21:28:17 - SEND to VM 1 | Logical clock: 148
+2025-03-01 21:28:17 - SEND to VM 2 | Logical clock: 149
+2025-03-01 21:28:17 - INTERNAL Internal event | Logical clock: 150
+2025-03-01 21:28:17 - INTERNAL Internal event | Logical clock: 151
+2025-03-01 21:28:17 - INTERNAL Internal event | Logical clock: 152
+2025-03-01 21:28:17 - SEND to VM 1 | Logical clock: 153
+2025-03-01 21:28:17 - SEND to VM 2 | Logical clock: 154
+2025-03-01 21:28:18 - INTERNAL Internal event | Logical clock: 155
+2025-03-01 21:28:18 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 157
+2025-03-01 21:28:18 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 159
+2025-03-01 21:28:18 - INTERNAL Internal event | Logical clock: 160
+2025-03-01 21:28:18 - SEND to VM 1 | Logical clock: 161
+2025-03-01 21:28:18 - SEND to VM 1 | Logical clock: 162
+2025-03-01 21:28:19 - INTERNAL Internal event | Logical clock: 163
+2025-03-01 21:28:19 - SEND to VM 2 | Logical clock: 164
+2025-03-01 21:28:19 - SEND to VM 2 | Logical clock: 165
+2025-03-01 21:28:19 - SEND to VM 1 | Logical clock: 166
+2025-03-01 21:28:19 - SEND to VM 2 | Logical clock: 167
+2025-03-01 21:28:19 - INTERNAL Internal event | Logical clock: 168
+2025-03-01 21:28:19 - INTERNAL Internal event | Logical clock: 169
+2025-03-01 21:28:20 - SEND to VM 2 | Logical clock: 170
+2025-03-01 21:28:20 - SEND to VM 2 | Logical clock: 171
+2025-03-01 21:28:20 - INTERNAL Internal event | Logical clock: 172
+2025-03-01 21:28:20 - SEND to VM 1 | Logical clock: 173
+2025-03-01 21:28:20 - INTERNAL Internal event | Logical clock: 174
+2025-03-01 21:28:20 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 175
+2025-03-01 21:28:21 - INTERNAL Internal event | Logical clock: 176
+2025-03-01 21:28:21 - INTERNAL Internal event | Logical clock: 177
+2025-03-01 21:28:21 - SEND to VM 1 | Logical clock: 178
+2025-03-01 21:28:21 - SEND to VM 2 | Logical clock: 179
+2025-03-01 21:28:21 - INTERNAL Internal event | Logical clock: 180
+2025-03-01 21:28:21 - INTERNAL Internal event | Logical clock: 181
+2025-03-01 21:28:21 - INTERNAL Internal event | Logical clock: 182
+2025-03-01 21:28:22 - SEND to VM 1 | Logical clock: 183
+2025-03-01 21:28:22 - SEND to VM 2 | Logical clock: 184
+2025-03-01 21:28:22 - SEND to VM 1 | Logical clock: 185
+2025-03-01 21:28:22 - SEND to VM 2 | Logical clock: 186
+2025-03-01 21:28:22 - INTERNAL Internal event | Logical clock: 187
+2025-03-01 21:28:22 - SEND to VM 1 | Logical clock: 188
+2025-03-01 21:28:22 - SEND to VM 2 | Logical clock: 189
+2025-03-01 21:28:22 - SEND to VM 2 | Logical clock: 190
+2025-03-01 21:28:22 - INTERNAL Internal event | Logical clock: 191
+2025-03-01 21:28:23 - INTERNAL Internal event | Logical clock: 192
+2025-03-01 21:28:23 - INTERNAL Internal event | Logical clock: 193
+2025-03-01 21:28:23 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 194
+2025-03-01 21:28:23 - SEND to VM 2 | Logical clock: 195
+2025-03-01 21:28:23 - SEND to VM 1 | Logical clock: 196
+2025-03-01 21:28:23 - SEND to VM 2 | Logical clock: 197
+2025-03-01 21:28:23 - INTERNAL Internal event | Logical clock: 198
+2025-03-01 21:28:24 - SEND to VM 1 | Logical clock: 199
+2025-03-01 21:28:24 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 200
+2025-03-01 21:28:24 - SEND to VM 1 | Logical clock: 201
+2025-03-01 21:28:24 - SEND to VM 2 | Logical clock: 202
+2025-03-01 21:28:24 - SEND to VM 2 | Logical clock: 203
+2025-03-01 21:28:24 - SEND to VM 2 | Logical clock: 204
+2025-03-01 21:28:24 - SEND to VM 2 | Logical clock: 205
+2025-03-01 21:28:25 - SEND to VM 2 | Logical clock: 206
+2025-03-01 21:28:25 - INTERNAL Internal event | Logical clock: 207
+2025-03-01 21:28:25 - SEND to VM 1 | Logical clock: 208
+2025-03-01 21:28:25 - SEND to VM 2 | Logical clock: 209
+2025-03-01 21:28:25 - SEND to VM 1 | Logical clock: 210
+2025-03-01 21:28:25 - SEND to VM 2 | Logical clock: 211
+2025-03-01 21:28:25 - SEND to VM 1 | Logical clock: 212
+2025-03-01 21:28:25 - SEND to VM 2 | Logical clock: 213
+2025-03-01 21:28:26 - SEND to VM 2 | Logical clock: 214
+2025-03-01 21:28:26 - INTERNAL Internal event | Logical clock: 215
+2025-03-01 21:28:26 - SEND to VM 2 | Logical clock: 216
+2025-03-01 21:28:26 - SEND to VM 1 | Logical clock: 217
+2025-03-01 21:28:26 - INTERNAL Internal event | Logical clock: 218
+2025-03-01 21:28:26 - SEND to VM 2 | Logical clock: 219
+2025-03-01 21:28:27 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 220
+2025-03-01 21:28:27 - INTERNAL Internal event | Logical clock: 221
+2025-03-01 21:28:27 - SEND to VM 2 | Logical clock: 222
+2025-03-01 21:28:27 - SEND to VM 1 | Logical clock: 223
+2025-03-01 21:28:27 - SEND to VM 1 | Logical clock: 224
+2025-03-01 21:28:27 - SEND to VM 2 | Logical clock: 225
+2025-03-01 21:28:27 - SEND to VM 2 | Logical clock: 226
+2025-03-01 21:28:28 - SEND to VM 2 | Logical clock: 227
+2025-03-01 21:28:28 - INTERNAL Internal event | Logical clock: 228
+2025-03-01 21:28:28 - INTERNAL Internal event | Logical clock: 229
+2025-03-01 21:28:28 - INTERNAL Internal event | Logical clock: 230
+2025-03-01 21:28:28 - SEND to VM 2 | Logical clock: 231
+2025-03-01 21:28:28 - INTERNAL Internal event | Logical clock: 232
+2025-03-01 21:28:29 - SEND to VM 2 | Logical clock: 233
+2025-03-01 21:28:29 - SEND to VM 2 | Logical clock: 234
+2025-03-01 21:28:29 - SEND to VM 2 | Logical clock: 235
+2025-03-01 21:28:29 - SEND to VM 1 | Logical clock: 236
+2025-03-01 21:28:29 - SEND to VM 2 | Logical clock: 237
+2025-03-01 21:28:29 - SEND to VM 1 | Logical clock: 238
+2025-03-01 21:28:29 - SEND to VM 2 | Logical clock: 239
+2025-03-01 21:28:29 - SEND to VM 1 | Logical clock: 240
+2025-03-01 21:28:29 - SEND to VM 2 | Logical clock: 241
+2025-03-01 21:28:30 - SEND to VM 2 | Logical clock: 242
+2025-03-01 21:28:30 - INTERNAL Internal event | Logical clock: 243
+2025-03-01 21:28:30 - INTERNAL Internal event | Logical clock: 244
+2025-03-01 21:28:30 - INTERNAL Internal event | Logical clock: 245
+2025-03-01 21:28:30 - INTERNAL Internal event | Logical clock: 246
+2025-03-01 21:28:30 - SEND to VM 2 | Logical clock: 247
+2025-03-01 21:28:31 - SEND to VM 2 | Logical clock: 248
+2025-03-01 21:28:31 - INTERNAL Internal event | Logical clock: 249
+2025-03-01 21:28:31 - SEND to VM 1 | Logical clock: 250
+2025-03-01 21:28:31 - SEND to VM 2 | Logical clock: 251
+2025-03-01 21:28:31 - SEND to VM 2 | Logical clock: 252
+2025-03-01 21:28:31 - INTERNAL Internal event | Logical clock: 253
+2025-03-01 21:28:31 - INTERNAL Internal event | Logical clock: 254
+2025-03-01 21:28:32 - INTERNAL Internal event | Logical clock: 255
+2025-03-01 21:28:32 - INTERNAL Internal event | Logical clock: 256
+2025-03-01 21:28:32 - SEND to VM 1 | Logical clock: 257
+2025-03-01 21:28:32 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 258
+2025-03-01 21:28:32 - INTERNAL Internal event | Logical clock: 259
+2025-03-01 21:28:32 - INTERNAL Internal event | Logical clock: 260
+2025-03-01 21:28:33 - INTERNAL Internal event | Logical clock: 261
+2025-03-01 21:28:33 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 262
+2025-03-01 21:28:33 - INTERNAL Internal event | Logical clock: 263
+2025-03-01 21:28:33 - INTERNAL Internal event | Logical clock: 264
+2025-03-01 21:28:33 - SEND to VM 2 | Logical clock: 265
+2025-03-01 21:28:34 - INTERNAL Internal event | Logical clock: 266
+2025-03-01 21:28:34 - INTERNAL Internal event | Logical clock: 267
+2025-03-01 21:28:34 - SEND to VM 2 | Logical clock: 268
+2025-03-01 21:28:34 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 269
+2025-03-01 21:28:34 - SEND to VM 2 | Logical clock: 270
+2025-03-01 21:28:34 - INTERNAL Internal event | Logical clock: 271
+2025-03-01 21:28:35 - INTERNAL Internal event | Logical clock: 272
+2025-03-01 21:28:35 - SEND to VM 2 | Logical clock: 273
+2025-03-01 21:28:35 - INTERNAL Internal event | Logical clock: 274
+2025-03-01 21:28:35 - SEND to VM 1 | Logical clock: 275
+2025-03-01 21:28:35 - SEND to VM 2 | Logical clock: 276
+2025-03-01 21:28:35 - INTERNAL Internal event | Logical clock: 277
+2025-03-01 21:28:35 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 279
+2025-03-01 21:28:36 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 281
+2025-03-01 21:28:36 - INTERNAL Internal event | Logical clock: 282
+2025-03-01 21:28:36 - SEND to VM 1 | Logical clock: 283
+2025-03-01 21:28:36 - SEND to VM 2 | Logical clock: 284
+2025-03-01 21:28:36 - INTERNAL Internal event | Logical clock: 285
+2025-03-01 21:28:36 - SEND to VM 2 | Logical clock: 286
+2025-03-01 21:28:36 - INTERNAL Internal event | Logical clock: 287
+2025-03-01 21:28:37 - SEND to VM 1 | Logical clock: 288
+2025-03-01 21:28:37 - SEND to VM 2 | Logical clock: 289
+2025-03-01 21:28:37 - SEND to VM 1 | Logical clock: 290
+2025-03-01 21:28:37 - SEND to VM 2 | Logical clock: 291
+2025-03-01 21:28:37 - INTERNAL Internal event | Logical clock: 292
+2025-03-01 21:28:37 - SEND to VM 2 | Logical clock: 293
+2025-03-01 21:28:37 - INTERNAL Internal event | Logical clock: 294
+2025-03-01 21:28:37 - SEND to VM 2 | Logical clock: 295
+2025-03-01 21:28:38 - INTERNAL Internal event | Logical clock: 296
+2025-03-01 21:28:38 - INTERNAL Internal event | Logical clock: 297
+2025-03-01 21:28:38 - INTERNAL Internal event | Logical clock: 298
+2025-03-01 21:28:38 - SEND to VM 2 | Logical clock: 299
+2025-03-01 21:28:38 - SEND to VM 1 | Logical clock: 300
+2025-03-01 21:28:38 - SEND to VM 2 | Logical clock: 301
+2025-03-01 21:28:39 - INTERNAL Internal event | Logical clock: 302
+2025-03-01 21:28:39 - SEND to VM 1 | Logical clock: 303
+2025-03-01 21:28:39 - SEND to VM 2 | Logical clock: 304
+2025-03-01 21:28:39 - SEND to VM 2 | Logical clock: 305
+2025-03-01 21:28:39 - SEND to VM 2 | Logical clock: 306
+2025-03-01 21:28:39 - SEND to VM 1 | Logical clock: 307
+2025-03-01 21:28:39 - SEND to VM 2 | Logical clock: 308
+2025-03-01 21:28:40 - INTERNAL Internal event | Logical clock: 309
+2025-03-01 21:28:40 - INTERNAL Internal event | Logical clock: 310
+2025-03-01 21:28:40 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 311
+2025-03-01 21:28:40 - SEND to VM 2 | Logical clock: 312
+2025-03-01 21:28:40 - INTERNAL Internal event | Logical clock: 313
+2025-03-01 21:28:40 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 315
+2025-03-01 21:28:41 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 317
+2025-03-01 21:28:41 - SEND to VM 2 | Logical clock: 318
+2025-03-01 21:28:41 - INTERNAL Internal event | Logical clock: 319
+2025-03-01 21:28:41 - RECEIVE from VM 2 | Queue length: 1 | Logical clock: 321
+2025-03-01 21:28:41 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 322
+2025-03-01 21:28:42 - INTERNAL Internal event | Logical clock: 323
+2025-03-01 21:28:42 - INTERNAL Internal event | Logical clock: 324
+2025-03-01 21:28:42 - SEND to VM 1 | Logical clock: 325
+2025-03-01 21:28:42 - SEND to VM 2 | Logical clock: 326
+2025-03-01 21:28:42 - SEND to VM 2 | Logical clock: 327
+2025-03-01 21:28:42 - SEND to VM 2 | Logical clock: 328
+2025-03-01 21:28:42 - INTERNAL Internal event | Logical clock: 329
+2025-03-01 21:28:43 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 330
+2025-03-01 21:28:43 - INTERNAL Internal event | Logical clock: 331
+2025-03-01 21:28:43 - INTERNAL Internal event | Logical clock: 332
+2025-03-01 21:28:43 - SEND to VM 1 | Logical clock: 333
+2025-03-01 21:28:43 - SEND to VM 2 | Logical clock: 334
+2025-03-01 21:28:43 - INTERNAL Internal event | Logical clock: 335
+2025-03-01 21:28:43 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 337
+2025-03-01 21:28:44 - SEND to VM 2 | Logical clock: 338
+2025-03-01 21:28:44 - SEND to VM 2 | Logical clock: 339
+2025-03-01 21:28:44 - INTERNAL Internal event | Logical clock: 340
+2025-03-01 21:28:44 - INTERNAL Internal event | Logical clock: 341
+2025-03-01 21:28:44 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 342
+2025-03-01 21:28:44 - SEND to VM 1 | Logical clock: 343
+2025-03-01 21:28:44 - SEND to VM 2 | Logical clock: 344
+2025-03-01 21:28:45 - INTERNAL Internal event | Logical clock: 345
+2025-03-01 21:28:45 - INTERNAL Internal event | Logical clock: 346
+2025-03-01 21:28:45 - SEND to VM 1 | Logical clock: 347
+2025-03-01 21:28:45 - SEND to VM 2 | Logical clock: 348
+2025-03-01 21:28:45 - INTERNAL Internal event | Logical clock: 349
+2025-03-01 21:28:45 - INTERNAL Internal event | Logical clock: 350
+2025-03-01 21:28:45 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 351
+2025-03-01 21:28:46 - INTERNAL Internal event | Logical clock: 352
+2025-03-01 21:28:46 - RECEIVE from VM 1 | Queue length: 1 | Logical clock: 354
+2025-03-01 21:28:46 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 355
+2025-03-01 21:28:46 - SEND to VM 2 | Logical clock: 356
+2025-03-01 21:28:46 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 357
+2025-03-01 21:28:46 - INTERNAL Internal event | Logical clock: 358
+2025-03-01 21:28:47 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 360
+2025-03-01 21:28:47 - SEND to VM 1 | Logical clock: 361
+2025-03-01 21:28:47 - SEND to VM 2 | Logical clock: 362
+2025-03-01 21:28:47 - SEND to VM 1 | Logical clock: 363
+2025-03-01 21:28:47 - SEND to VM 2 | Logical clock: 364
+2025-03-01 21:28:47 - SEND to VM 2 | Logical clock: 365
+2025-03-01 21:28:47 - INTERNAL Internal event | Logical clock: 366
+2025-03-01 21:28:47 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 367
+2025-03-01 21:28:48 - SEND to VM 2 | Logical clock: 368
+2025-03-01 21:28:48 - INTERNAL Internal event | Logical clock: 369
+2025-03-01 21:28:48 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 370
+2025-03-01 21:28:48 - INTERNAL Internal event | Logical clock: 371
+2025-03-01 21:28:48 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 372
+2025-03-01 21:28:48 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 373
+2025-03-01 21:28:49 - INTERNAL Internal event | Logical clock: 374
+2025-03-01 21:28:49 - INTERNAL Internal event | Logical clock: 375
+2025-03-01 21:28:49 - INTERNAL Internal event | Logical clock: 376
+2025-03-01 21:28:49 - INTERNAL Internal event | Logical clock: 377
+2025-03-01 21:28:49 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 378
+2025-03-01 21:28:50 - SEND to VM 1 | Logical clock: 379
+2025-03-01 21:28:50 - SEND to VM 2 | Logical clock: 380
+2025-03-01 21:28:50 - INTERNAL Internal event | Logical clock: 381
+2025-03-01 21:28:50 - SEND to VM 1 | Logical clock: 382
+2025-03-01 21:28:50 - SEND to VM 2 | Logical clock: 383
+2025-03-01 21:28:50 - INTERNAL Internal event | Logical clock: 384
+2025-03-01 21:28:50 - SEND to VM 1 | Logical clock: 385
+2025-03-01 21:28:50 - SEND to VM 2 | Logical clock: 386
+2025-03-01 21:28:51 - SEND to VM 1 | Logical clock: 387
+2025-03-01 21:28:51 - SEND to VM 2 | Logical clock: 388
+2025-03-01 21:28:51 - INTERNAL Internal event | Logical clock: 389
+2025-03-01 21:28:51 - INTERNAL Internal event | Logical clock: 390
+2025-03-01 21:28:51 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 392
+2025-03-01 21:28:51 - RECEIVE from VM 1 | Queue length: 0 | Logical clock: 393
+2025-03-01 21:28:52 - INTERNAL Internal event | Logical clock: 394
+2025-03-01 21:28:52 - INTERNAL Internal event | Logical clock: 395
+2025-03-01 21:28:52 - INTERNAL Internal event | Logical clock: 396
+2025-03-01 21:28:52 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 397
+2025-03-01 21:28:52 - SEND to VM 1 | Logical clock: 398
+2025-03-01 21:28:52 - SEND to VM 2 | Logical clock: 399
+2025-03-01 21:28:52 - INTERNAL Internal event | Logical clock: 400
+2025-03-01 21:28:53 - SEND to VM 1 | Logical clock: 401
+2025-03-01 21:28:53 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 402
+2025-03-01 21:28:53 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 404
+2025-03-01 21:28:53 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 406
+2025-03-01 21:28:53 - SEND to VM 1 | Logical clock: 407
+2025-03-01 21:28:53 - SEND to VM 2 | Logical clock: 408
+2025-03-01 21:28:54 - INTERNAL Internal event | Logical clock: 409
+2025-03-01 21:28:54 - INTERNAL Internal event | Logical clock: 410
+2025-03-01 21:28:54 - SEND to VM 1 | Logical clock: 411
+2025-03-01 21:28:54 - RECEIVE from VM 2 | Queue length: 0 | Logical clock: 413
