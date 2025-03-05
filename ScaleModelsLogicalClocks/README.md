@@ -7,6 +7,8 @@ There are 2 files.
 
 ## how to run - distributed_system.py
 
+Processes implementation.
+
 This file save the log files for each of the VMs to the current folder.
 
 1.  Simulation Mode (Multiple VMs in One Process)
