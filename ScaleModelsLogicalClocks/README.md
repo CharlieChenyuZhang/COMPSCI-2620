@@ -52,3 +52,27 @@ python vm.py --experiment=2 --run=3      (runs experiment 2, run 3)
 ```
 python vm.py --experiment=1 --batch      (runs experiment 1 five times)
 ```
+
+## how to run the test
+
+For the unittest, we only test the distributed_system.py since this is the main logic. vm.py just added the extra logic to run multiple runs and write to files.
+
+```
+python -m unittest test_distributed_system.py
+```
+
+Below is the result
+
+```
+VM 2 connected to VMs: [1]
+VM 1 connected to VMs: [2]
+VM 2 started with clock rate 6 ticks/sec.
+VM 1 started with clock rate 6 ticks/sec.
+VM 1 listener error: [Errno 53] Software caused connection abort
+VM 2 listener error: [Errno 53] Software caused connection abort
+.
+----------------------------------------------------------------------
+Ran 1 test in 5.008s
+
+OK
+```
