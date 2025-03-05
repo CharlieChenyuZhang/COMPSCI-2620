@@ -28,6 +28,8 @@ class VirtualMachine:
             self.clock_rate = random.randint(1, 6)
         elif self.experiment_mode == 2:
             self.clock_rate = random.randint(4, 6)
+        elif self.experiment_mode == 3:
+            self.clock_rate = random.randint(1, 6)
         else:
             self.clock_rate = random.randint(1, 6)
         self.logical_clock = 0
@@ -144,6 +146,8 @@ class VirtualMachine:
                     r = random.randint(1, 10)
                 elif self.experiment_mode == 2:
                     r = random.randint(1, 6)
+                elif self.experiment_mode == 3:
+                    r = random.randint(1, 4)
                 else:
                     r = random.randint(1, 10)
 
