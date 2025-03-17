@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package replication;
+
+// Service for replication between replicas.
+service ReplicationService {
+  // Append an entry to the log.
+  rpc AppendEntry(AppendEntryRequest) returns (AppendEntryResponse);
+}
+
+// Request message for appending a log entry.
+// The entry is provided as a JSON string.
+message AppendEntryRequest {
+  string entry_json = 1;
+}
+
+// Response message for the AppendEntry RPC.
+// The success field indicates if the replication was successful.
+message AppendEntryResponse {
+  bool success = 1;
+}
