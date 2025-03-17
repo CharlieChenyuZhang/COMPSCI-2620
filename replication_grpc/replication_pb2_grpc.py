@@ -26,7 +26,7 @@ if _version_not_supported:
 
 
 class ReplicationServiceStub(object):
-    """Service for replication between replicas.
+    """RPC for replicating log entries (and heartbeat messages)
     """
 
     def __init__(self, channel):
@@ -40,15 +40,25 @@ class ReplicationServiceStub(object):
                 request_serializer=replication__pb2.AppendEntryRequest.SerializeToString,
                 response_deserializer=replication__pb2.AppendEntryResponse.FromString,
                 _registered_method=True)
+        self.RequestVote = channel.unary_unary(
+                '/replication.ReplicationService/RequestVote',
+                request_serializer=replication__pb2.RequestVoteRequest.SerializeToString,
+                response_deserializer=replication__pb2.RequestVoteResponse.FromString,
+                _registered_method=True)
 
 
 class ReplicationServiceServicer(object):
-    """Service for replication between replicas.
+    """RPC for replicating log entries (and heartbeat messages)
     """
 
     def AppendEntry(self, request, context):
-        """Append an entry to the log.
-        """
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RequestVote(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -61,6 +71,11 @@ def add_ReplicationServiceServicer_to_server(servicer, server):
                     request_deserializer=replication__pb2.AppendEntryRequest.FromString,
                     response_serializer=replication__pb2.AppendEntryResponse.SerializeToString,
             ),
+            'RequestVote': grpc.unary_unary_rpc_method_handler(
+                    servicer.RequestVote,
+                    request_deserializer=replication__pb2.RequestVoteRequest.FromString,
+                    response_serializer=replication__pb2.RequestVoteResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'replication.ReplicationService', rpc_method_handlers)
@@ -70,7 +85,7 @@ def add_ReplicationServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class ReplicationService(object):
-    """Service for replication between replicas.
+    """RPC for replicating log entries (and heartbeat messages)
     """
 
     @staticmethod
@@ -90,6 +105,33 @@ class ReplicationService(object):
             '/replication.ReplicationService/AppendEntry',
             replication__pb2.AppendEntryRequest.SerializeToString,
             replication__pb2.AppendEntryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RequestVote(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/replication.ReplicationService/RequestVote',
+            replication__pb2.RequestVoteRequest.SerializeToString,
+            replication__pb2.RequestVoteResponse.FromString,
             options,
             channel_credentials,
             insecure,
