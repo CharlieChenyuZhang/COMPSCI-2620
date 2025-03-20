@@ -6,6 +6,7 @@ import time
 import random
 import datetime
 import sys
+import multiprocessing
 
 class VirtualMachine:
     def __init__(self, vm_id, host, port, other_vms, experiment_mode, output_folder):
@@ -27,6 +28,10 @@ class VirtualMachine:
         if self.experiment_mode == 1:
             self.clock_rate = random.randint(1, 6)
         elif self.experiment_mode == 2:
+            self.clock_rate = random.randint(4, 6)
+        elif self.experiment_mode == 3:
+            self.clock_rate = random.randint(1, 6)
+        elif self.experiment_mode == 4:
             self.clock_rate = random.randint(4, 6)
         else:
             self.clock_rate = random.randint(1, 6)
@@ -144,6 +149,10 @@ class VirtualMachine:
                     r = random.randint(1, 10)
                 elif self.experiment_mode == 2:
                     r = random.randint(1, 6)
+                elif self.experiment_mode == 3:
+                    r = random.randint(1, 4)
+                elif self.experiment_mode == 4:
+                    r = random.randint(1, 10)
                 else:
                     r = random.randint(1, 10)
 
@@ -179,31 +188,44 @@ class VirtualMachine:
             s.close()
 
 
+def vm_process_main(vm_id, host, port, other_vms, experiment_mode, output_folder, time_to_run):
+    """
+    Helper function to run a single VM in a separate process.
+    It starts the VM, lets it run for 'time_to_run' seconds, then stops it.
+    """
+    vm = VirtualMachine(vm_id, host, port, other_vms, experiment_mode, output_folder)
+    vm.start()
+    time.sleep(time_to_run)
+    vm.stop()
+
+
 def run_simulation(experiment_mode, run_number, time_to_run=60, num_vms=3, base_port=10000):
     """
     Runs a simulation with a given experiment mode and run number.
     The logs are saved in a folder named "experiment_{experiment_mode}_run_{run_number}".
+    Now, each VM is run in its own process.
     """
     output_folder = f"experiment_{experiment_mode}_run_{run_number}"
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-    vms = []
-    vm_configs = {}
-    for i in range(num_vms):
-        vm_configs[i] = ("127.0.0.1", base_port + i)
+        
+    processes = []
     for i in range(num_vms):
         # Prepare configuration for other VMs (excluding self).
-        other_vms = {j: vm_configs[j] for j in vm_configs if j != i}
-        vm = VirtualMachine(i, "127.0.0.1", vm_configs[i][1], other_vms, experiment_mode, output_folder)
-        vms.append(vm)
-        threading.Thread(target=vm.start, daemon=True).start()
+        other_vms = {j: ("127.0.0.1", base_port + j) for j in range(num_vms) if j != i}
+        p = multiprocessing.Process(
+            target=vm_process_main,
+            args=(i, "127.0.0.1", base_port + i, other_vms, experiment_mode, output_folder, time_to_run)
+        )
+        processes.append(p)
+        p.start()
+
     print(f"Simulation of {num_vms} VMs started for experiment {experiment_mode} run {run_number}. Running for {time_to_run} seconds...")
-    try:
-        time.sleep(time_to_run)
-    except KeyboardInterrupt:
-        pass
-    for vm in vms:
-        vm.stop()
+    
+    # Wait for all VM processes to finish.
+    for p in processes:
+        p.join()
+    
     print(f"Simulation for experiment {experiment_mode} run {run_number} ended.\n")
 
 
@@ -216,7 +238,7 @@ if __name__ == "__main__":
     # Simple command-line argument parsing.
     # Examples:
     #   python vm.py --experiment=2 --run=3      (runs experiment 2, run 3)
-    #   python vm.py --experiment=1 --batch      (runs experiment 1 five times)
+    #   python vm.py --experiment=1 --batch        (runs experiment 1 five times)
     for arg in sys.argv[1:]:
         if arg.startswith("--experiment="):
             try:

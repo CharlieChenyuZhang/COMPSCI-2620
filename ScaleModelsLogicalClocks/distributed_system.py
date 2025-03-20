@@ -5,6 +5,7 @@ import time
 import random
 import datetime
 import sys
+import multiprocessing
 
 class VirtualMachine:
     def __init__(self, vm_id, host, port, other_vms):
@@ -120,7 +121,7 @@ class VirtualMachine:
             tick_start = time.time()
             if not self.msg_queue.empty():
                 try:
-                    sender_id, msg_timestamp = self.msg_queue.get_nowait() # non-blocking way to retrieve an item from a queue.Queue
+                    sender_id, msg_timestamp = self.msg_queue.get_nowait()  # non-blocking retrieval
                     with self.lock:
                         self.logical_clock = max(self.logical_clock, msg_timestamp) + 1
                     self.log_event("RECEIVE", f"from VM {sender_id}")
@@ -161,9 +162,20 @@ class VirtualMachine:
         for s in self.client_sockets.values():
             s.close()
 
+def run_vm(vm_id, host, port, other_vms, time_to_run):
+    """
+    Function to run a VM instance in a separate process.
+    """
+    vm = VirtualMachine(vm_id, host, port, other_vms)
+    vm.start()
+    try:
+        time.sleep(time_to_run)
+    except KeyboardInterrupt:
+        pass
+    vm.stop()
+
 if __name__ == "__main__":
-    time_to_run = 60 # seconds
-    
+    time_to_run = 60  # seconds
     # Run either as a single VM (with command-line parameters) or spawn a simulation of 3 VMs.
     if len(sys.argv) > 1:
         # Expected arguments: vm_id port other_vm_info...
@@ -181,30 +193,27 @@ if __name__ == "__main__":
         vm = VirtualMachine(vm_id, "127.0.0.1", port, other_vms)
         vm.start()
         try:
-            # Run for time_to_run seconds (or until interrupted).
             time.sleep(time_to_run)
         except KeyboardInterrupt:
             pass
         vm.stop()
     else:
-        # Simulation: create 3 VMs with ports 10000, 10001, and 10002.
+        # Simulation: create 3 VMs with ports 10000, 10001, and 10002 using processes.
         num_vms = 3
         base_port = 10000
-        vms = []
         vm_configs = {}
         for i in range(num_vms):
             vm_configs[i] = ("127.0.0.1", base_port + i)
+        
+        processes = []
         for i in range(num_vms):
             # Prepare configuration for other VMs (excluding self).
             other_vms = {j: vm_configs[j] for j in vm_configs if j != i}
-            vm = VirtualMachine(i, "127.0.0.1", vm_configs[i][1], other_vms)
-            vms.append(vm)
-            threading.Thread(target=vm.start, daemon=True).start()
+            p = multiprocessing.Process(target=run_vm, args=(i, "127.0.0.1", vm_configs[i][1], other_vms, time_to_run))
+            processes.append(p)
+            p.start()
+        
         print(f"Simulation of 3 VMs started. Running for {time_to_run} seconds...")
-        try:
-            time.sleep(time_to_run)
-        except KeyboardInterrupt:
-            pass
-        for vm in vms:
-            vm.stop()
+        for p in processes:
+            p.join()
         print("Simulation ended.")
