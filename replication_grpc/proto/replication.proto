@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package replication;
+
+// RPC for replicating log entries (and heartbeat messages)
+service ReplicationService {
+  rpc AppendEntry(AppendEntryRequest) returns (AppendEntryResponse);
+  rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
+}
+
+// Message for appending an entry (including heartbeat messages)
+message AppendEntryRequest {
+  string entry_json = 1;
+}
+
+message AppendEntryResponse {
+  bool success = 1;
+}
+
+// Message for requesting a vote during leader election
+message RequestVoteRequest {
+  int32 term = 1;
+  string candidate_id = 2;
+}
+
+// Message for responding to a vote request
+message RequestVoteResponse {
+  bool vote_granted = 1;
+  int32 term = 2;
+}
+
+message SendMessageResponse {
+    bool success = 1;
+    string message = 2;
+    string message_id = 3;
+}
