@@ -33,7 +33,7 @@ class ReplicatedStore:
         self.node_id = str(node_id)
         self.peer_addresses = peer_addresses  # List of peer replication addresses (e.g., "localhost:50052")
         self.storage_file = storage_file
-        self.lock = threading.RLock()  # allows the same thread to acquire the lock multiple times without deadlocking.
+        self.lock = threading.RLock()  # reentrant lock. allows the same thread to acquire the lock multiple times without deadlocking.
 
         # Election state variables.
         self.current_term = 0
