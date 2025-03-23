@@ -33,7 +33,7 @@ class ReplicatedStore:
         self.node_id = str(node_id)
         self.peer_addresses = peer_addresses  # List of peer replication addresses (e.g., "localhost:50052")
         self.storage_file = storage_file
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()  # allows the same thread to acquire the lock multiple times without deadlocking.
 
         # Election state variables.
         self.current_term = 0
@@ -159,6 +159,7 @@ class ReplicatedStore:
     # ---------------
     def start_election(self):
         """Trigger an election: become candidate, increment term, and request votes."""
+        logging.info("Starting election")
         with self.lock:
             self.role = "candidate"
             self.current_term += 1
@@ -166,7 +167,7 @@ class ReplicatedStore:
             vote_count = 1  # Vote for self.
             current_term = self.current_term
             logging.info(f"Node {self.node_id} starting election for term {current_term}")
-
+        logging.info("Soliciting votes")
         # Solicit votes from all peers.
         for peer in self.peer_addresses:
             try:
@@ -178,7 +179,7 @@ class ReplicatedStore:
                     vote_count += 1
             except Exception as e:
                 logging.error(f"Error sending RequestVote to {peer}: {e}")
-
+        logging.info("Votes solicited")
         with self.lock:
             if vote_count >= self.quorum_size():
                 self.role = "leader"
@@ -188,7 +189,7 @@ class ReplicatedStore:
                 logging.info(f"Node {self.node_id} failed election in term {self.current_term} (got {vote_count} votes)")
                 self.role = "follower"
                 self.voted_for = None
-
+        logging.info("Election complete")
     def send_heartbeats(self):
         """Send heartbeat messages (via AppendEntry RPC with a 'heartbeat' entry) to all peers."""
         heartbeat_entry = {
