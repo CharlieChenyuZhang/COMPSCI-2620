@@ -204,7 +204,8 @@ class ReplicatedStore:
                 req = replication_pb2.AppendEntryRequest(entry_json=json.dumps(heartbeat_entry))
                 stub.AppendEntry(req, timeout=3)
             except Exception as e:
-                logging.error(f"Error sending heartbeat to {peer}: {e}")
+                # logging.error(f"Error sending heartbeat to {peer}: {e}")
+                logging.error(f"Cannot send heartbeat to {peer}")
 
     def election_daemon(self):
         """
