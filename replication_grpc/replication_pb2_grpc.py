@@ -45,6 +45,11 @@ class ReplicationServiceStub(object):
                 request_serializer=proto_dot_replication__pb2.RequestVoteRequest.SerializeToString,
                 response_deserializer=proto_dot_replication__pb2.RequestVoteResponse.FromString,
                 _registered_method=True)
+        self.AnnounceNode = channel.unary_unary(
+                '/replication.ReplicationService/AnnounceNode',
+                request_serializer=proto_dot_replication__pb2.AnnounceRequest.SerializeToString,
+                response_deserializer=proto_dot_replication__pb2.AnnounceResponse.FromString,
+                _registered_method=True)
 
 
 class ReplicationServiceServicer(object):
@@ -52,13 +57,21 @@ class ReplicationServiceServicer(object):
     """
 
     def AppendEntry(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Existing RPC methods
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def RequestVote(self, request, context):
         """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def AnnounceNode(self, request, context):
+        """New RPC method for server discovery
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -75,6 +88,11 @@ def add_ReplicationServiceServicer_to_server(servicer, server):
                     servicer.RequestVote,
                     request_deserializer=proto_dot_replication__pb2.RequestVoteRequest.FromString,
                     response_serializer=proto_dot_replication__pb2.RequestVoteResponse.SerializeToString,
+            ),
+            'AnnounceNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.AnnounceNode,
+                    request_deserializer=proto_dot_replication__pb2.AnnounceRequest.FromString,
+                    response_serializer=proto_dot_replication__pb2.AnnounceResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -132,6 +150,33 @@ class ReplicationService(object):
             '/replication.ReplicationService/RequestVote',
             proto_dot_replication__pb2.RequestVoteRequest.SerializeToString,
             proto_dot_replication__pb2.RequestVoteResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AnnounceNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/replication.ReplicationService/AnnounceNode',
+            proto_dot_replication__pb2.AnnounceRequest.SerializeToString,
+            proto_dot_replication__pb2.AnnounceResponse.FromString,
             options,
             channel_credentials,
             insecure,

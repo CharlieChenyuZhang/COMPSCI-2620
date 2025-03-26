@@ -9,6 +9,7 @@ from datetime import datetime
 import re
 import time
 import random
+import json
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +19,12 @@ class ChatClient:
     def __init__(self, host='localhost', known_ports=None, max_port_attempts=8):
         self._host = host
         if known_ports is None:
-            self._known_ports = [50051, 50061, 50071]  # Default known ports
+            # Default known ports - scan a range to find all servers
+            self._known_ports = []
+            self._scan_for_servers()
+            if not self._known_ports:
+                # Fall back to defaults if scan found nothing
+                self._known_ports = [50051, 50061, 50071]
         else:
             self._known_ports = known_ports
             
@@ -26,12 +32,32 @@ class ChatClient:
         self._max_port_attempts = max_port_attempts
         self._tried_ports = set()
         self._leader_port = None
-        self._port = self._known_ports[self._current_port_idx]
+        self._port = None  # Will be set by _connect_to_server
         self.session_id: Optional[str] = None
         self._is_channel_active = False
         self._subscription_thread = None
         self._stop_subscription = threading.Event()
         self._connect_to_server()
+
+    def _scan_for_servers(self):
+        """Scan common port ranges for active servers"""
+        import socket
+        
+        # Scan ports in the range 50051-50151 (step 10)
+        for base_port in range(50051, 50152, 10):
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(0.1)  # Very short timeout for quick scanning
+                result = s.connect_ex((self._host, base_port))
+                s.close()
+                
+                if result == 0:  # Port is open
+                    logger.info(f"Found active server at port {base_port}")
+                    self._known_ports.append(base_port)
+            except Exception:
+                pass
+        
+        logger.info(f"Server scan found {len(self._known_ports)} active servers")
 
     def _connect_to_server(self):
         """Try to connect to a server, first attempting known ports then exploring others"""
@@ -268,7 +294,47 @@ class ChatClient:
         """Ensure channel is active, recreate if needed"""
         if not self._is_channel_active:
             return self._connect_to_server()
+        
+        # Periodically check for new servers (every 30 requests)
+        if hasattr(self, '_request_count'):
+            self._request_count += 1
+            if self._request_count % 30 == 0:
+                self._discover_servers()
+        else:
+            self._request_count = 1
+            
         return True
+    
+    def _discover_servers(self):
+        """Ask the current server for its peer list"""
+        try:
+            if hasattr(self, 'stub') and self.stub is not None:
+                # Create a request to check server health and get metadata
+                request = chat_pb2.ListAccountsRequest(pattern="*")
+                # Use metadata to request server list
+                metadata = [('discover_servers', 'true')]
+                response = self.stub.ListAccounts(request, metadata=metadata)
+                
+                # Check if response contains server_list metadata
+                for key, value in response.trailing_metadata():
+                    if key == 'known_servers':
+                        try:
+                            server_list = json.loads(value)
+                            if isinstance(server_list, list):
+                                # Extract port numbers
+                                for server in server_list:
+                                    try:
+                                        port = int(server.split(':')[-1])
+                                        if port not in self._known_ports and port % 10 == 1:
+                                            # Only add chat service ports (ending in 1)
+                                            self._known_ports.append(port)
+                                            logger.info(f"Discovered new server port: {port}")
+                                    except (ValueError, IndexError):
+                                        continue
+                        except json.JSONDecodeError:
+                            pass
+        except Exception as e:
+            logger.debug(f"Error discovering servers: {e}")
 
     def _handle_rpc_error(self, e):
         """Handle RPC errors, including leadership changes"""

@@ -24,23 +24,27 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17proto/replication.proto\x12\x0breplication\"(\n\x12\x41ppendEntryRequest\x12\x12\n\nentry_json\x18\x01 \x01(\t\"4\n\x13\x41ppendEntryResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0c\n\x04term\x18\x02 \x01(\x05\"8\n\x12RequestVoteRequest\x12\x0c\n\x04term\x18\x01 \x01(\x05\x12\x14\n\x0c\x63\x61ndidate_id\x18\x02 \x01(\t\"9\n\x13RequestVoteResponse\x12\x14\n\x0cvote_granted\x18\x01 \x01(\x08\x12\x0c\n\x04term\x18\x02 \x01(\x05\"K\n\x13SendMessageResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x12\n\nmessage_id\x18\x03 \x01(\t2\xb8\x01\n\x12ReplicationService\x12P\n\x0b\x41ppendEntry\x12\x1f.replication.AppendEntryRequest\x1a .replication.AppendEntryResponse\x12P\n\x0bRequestVote\x12\x1f.replication.RequestVoteRequest\x1a .replication.RequestVoteResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17proto/replication.proto\x12\x0breplication\"?\n\x0f\x41nnounceRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x1b\n\x13replication_address\x18\x02 \x01(\t\";\n\x10\x41nnounceResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x16\n\x0epeer_addresses\x18\x02 \x03(\t\"(\n\x12\x41ppendEntryRequest\x12\x12\n\nentry_json\x18\x01 \x01(\t\"4\n\x13\x41ppendEntryResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0c\n\x04term\x18\x02 \x01(\x05\"8\n\x12RequestVoteRequest\x12\x0c\n\x04term\x18\x01 \x01(\x05\x12\x14\n\x0c\x63\x61ndidate_id\x18\x02 \x01(\t\"9\n\x13RequestVoteResponse\x12\x14\n\x0cvote_granted\x18\x01 \x01(\x08\x12\x0c\n\x04term\x18\x02 \x01(\x05\"K\n\x13SendMessageResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x12\n\nmessage_id\x18\x03 \x01(\t2\x85\x02\n\x12ReplicationService\x12P\n\x0b\x41ppendEntry\x12\x1f.replication.AppendEntryRequest\x1a .replication.AppendEntryResponse\x12P\n\x0bRequestVote\x12\x1f.replication.RequestVoteRequest\x1a .replication.RequestVoteResponse\x12K\n\x0c\x41nnounceNode\x12\x1c.replication.AnnounceRequest\x1a\x1d.replication.AnnounceResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'proto.replication_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_APPENDENTRYREQUEST']._serialized_start=40
-  _globals['_APPENDENTRYREQUEST']._serialized_end=80
-  _globals['_APPENDENTRYRESPONSE']._serialized_start=82
-  _globals['_APPENDENTRYRESPONSE']._serialized_end=134
-  _globals['_REQUESTVOTEREQUEST']._serialized_start=136
-  _globals['_REQUESTVOTEREQUEST']._serialized_end=192
-  _globals['_REQUESTVOTERESPONSE']._serialized_start=194
-  _globals['_REQUESTVOTERESPONSE']._serialized_end=251
-  _globals['_SENDMESSAGERESPONSE']._serialized_start=253
-  _globals['_SENDMESSAGERESPONSE']._serialized_end=328
-  _globals['_REPLICATIONSERVICE']._serialized_start=331
-  _globals['_REPLICATIONSERVICE']._serialized_end=515
+  _globals['_ANNOUNCEREQUEST']._serialized_start=40
+  _globals['_ANNOUNCEREQUEST']._serialized_end=103
+  _globals['_ANNOUNCERESPONSE']._serialized_start=105
+  _globals['_ANNOUNCERESPONSE']._serialized_end=164
+  _globals['_APPENDENTRYREQUEST']._serialized_start=166
+  _globals['_APPENDENTRYREQUEST']._serialized_end=206
+  _globals['_APPENDENTRYRESPONSE']._serialized_start=208
+  _globals['_APPENDENTRYRESPONSE']._serialized_end=260
+  _globals['_REQUESTVOTEREQUEST']._serialized_start=262
+  _globals['_REQUESTVOTEREQUEST']._serialized_end=318
+  _globals['_REQUESTVOTERESPONSE']._serialized_start=320
+  _globals['_REQUESTVOTERESPONSE']._serialized_end=377
+  _globals['_SENDMESSAGERESPONSE']._serialized_start=379
+  _globals['_SENDMESSAGERESPONSE']._serialized_end=454
+  _globals['_REPLICATIONSERVICE']._serialized_start=457
+  _globals['_REPLICATIONSERVICE']._serialized_end=718
 # @@protoc_insertion_point(module_scope)

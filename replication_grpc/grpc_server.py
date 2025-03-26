@@ -30,9 +30,14 @@ class ReplicatedStore:
     """
     def __init__(self, node_id, peer_addresses, storage_file, is_leader=False):
         self.node_id = str(node_id)
-        self.peer_addresses = peer_addresses  # List of peer replication addresses (e.g., "localhost:50052")
+        self.initial_peer_addresses = peer_addresses.copy()  # Keep original list
+        self.peer_addresses = peer_addresses.copy()  # List of peer replication addresses (e.g., "localhost:50052")
         self.storage_file = storage_file
+        self.metadata_file = f"metadata_{node_id}.json"  # Store peers and other metadata
         self.lock = threading.RLock()  # reentrant lock. allows the same thread to acquire the lock multiple times without deadlocking.
+
+        # Load metadata if exists (peer list, etc)
+        self.load_metadata()
 
         self.peer_failure_times = {}  # Keep track of when peers failed
         self.peer_retry_intervals = {}  # How long to wait before retrying
@@ -99,51 +104,62 @@ class ReplicatedStore:
         # New server gets an extended initial election timeout to avoid disrupting the cluster
         self.initial_startup = True
         self.startup_time = time.time()
+        
+        # Announce to existing peers if we're new
+        self._announce_to_cluster()
 
         # Start election daemon thread.
         threading.Thread(target=self.election_daemon, daemon=True).start()
-                 
-    def _verify_peer_is_alive(self, port):
+                            
+    def _verify_peer_is_alive(self, peer_address):
         """Verify if a peer server is actually alive and responding"""
         try:
-            import socket
-            import time
+            # Extract the port from the peer address
+            port = int(peer_address.split(":")[-1])
+            host = peer_address.split(":")[0]
             
-            start_time = time.time()
+            # Try socket-level check first
+            import socket
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(0.3)  # Very short timeout
             
-            try:
-                # Attempt to connect
-                result = s.connect_ex(('localhost', port))
-                
-                if result != 0:
-                    s.close()
-                    return False
-                    
-                # Send a minimal probe packet
-                s.send(b'\x00')
-                s.settimeout(0.2)
-                
-                try:
-                    # Try to receive anything (timeout expected)
-                    s.recv(1)
-                except socket.timeout:
-                    # This is normal, we aren't sending a proper request
-                    s.close()
-                    return True
-                
+            result = s.connect_ex((host, port))
+            if result != 0:
                 s.close()
-                return True
-                
-            except (ConnectionRefusedError, BrokenPipeError):
                 return False
-            finally:
-                s.close()
                 
-        except Exception:
+            # Basic TCP handshake succeeded, now close properly
+            try:
+                s.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
+            s.close()
+            
+            # For a more thorough check, try gRPC if we have a stub
+            if peer_address in self.peer_stubs:
+                try:
+                    # Simple heartbeat with very short timeout
+                    probe_entry = {
+                        "operation": "heartbeat",
+                        "term": self.current_term,
+                        "sender": self.node_id,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    req = replication_pb2.AppendEntryRequest(entry_json=json.dumps(probe_entry))
+                    response = self.peer_stubs[peer_address].AppendEntry(req, timeout=0.5)
+                    return True
+                except Exception:
+                    # If gRPC call fails but socket succeeded, give it the benefit of the doubt
+                    # This avoids too aggressively removing peers during temporary network issues
+                    return True
+            
+            # If we got here, socket check succeeded but no gRPC stub to test
+            return True
+            
+        except Exception as e:
+            logging.debug(f"Peer connectivity check error for {peer_address}: {e}")
             return False
-                        
+                                
     def _check_for_existing_leader(self):
         """Check if there's an existing leader with a higher term"""
         highest_term_found = self.current_term
@@ -207,6 +223,196 @@ class ReplicatedStore:
         # Return True if we found any active server with a higher term
         return highest_term_found > self.current_term
 
+    def _announce_to_cluster(self):
+        """Announce this server to all known peers"""
+        # If we have no initial peers, we're starting a new cluster
+        if not self.peer_addresses:
+            return
+            
+        my_replication_port = int(self.node_id) + 1  # Assuming the convention
+        my_address = f"localhost:{my_replication_port}"
+        
+        # Send announcement to all peers
+        success_count = 0
+        for peer in self.peer_addresses.copy():  # Use copy to avoid modification during iteration
+            try:
+                if peer in self.peer_stubs:
+                    stub = self.peer_stubs[peer]
+                else:
+                    # Create a new channel if needed
+                    channel = grpc.insecure_channel(peer)
+                    stub = replication_pb2_grpc.ReplicationServiceStub(channel)
+                
+                # Create announcement request
+                request = replication_pb2.AnnounceRequest(
+                    node_id=self.node_id,
+                    replication_address=my_address
+                )
+                
+                # Send announcement
+                response = stub.AnnounceNode(request, timeout=2)
+                if response.success:
+                    success_count += 1
+                    logging.info(f"Successfully announced to peer {peer}")
+                    
+                    # Check if peer sent back their peer list
+                    if response.peer_addresses:
+                        for new_peer in response.peer_addresses:
+                            if (new_peer not in self.peer_addresses and 
+                                new_peer != my_address):
+                                self.peer_addresses.append(new_peer)
+                                logging.info(f"Discovered new peer {new_peer} from announcement response")
+            except Exception as e:
+                logging.warning(f"Failed to announce to peer {peer}: {e}")
+        
+        if success_count > 0:
+            logging.info(f"Successfully announced to {success_count} peers")
+            # Save updated peer list
+            self.save_metadata()
+        else:
+            logging.warning("Failed to announce to any peers, will retry during heartbeats")
+
+    def prune_dead_peers(self):
+        """Remove unresponsive peers from peer_addresses list"""
+        if not hasattr(self, 'peer_failure_count'):
+            self.peer_failure_count = {}  # Track consecutive failures
+        
+        peers_to_remove = []
+        
+        for peer in self.peer_addresses[:]:  # Work on a copy to avoid modification during iteration
+            # Check if this peer has had persistent failures
+            if peer in self.peer_failure_times:
+                current_time = time.time()
+                failure_duration = current_time - self.peer_failure_times[peer]
+                
+                # Increment failure count if it exists, otherwise initialize to 1
+                self.peer_failure_count[peer] = self.peer_failure_count.get(peer, 0) + 1
+                
+                # If persistent failures for over 60 seconds or 5+ consecutive failures, consider removing
+                if failure_duration > 60 or self.peer_failure_count.get(peer, 0) >= 5:
+                    # Verify one more time before removing
+                    if not self._verify_peer_is_alive(peer):
+                        peers_to_remove.append(peer)
+                        logging.warning(f"Removing persistently unresponsive peer: {peer}")
+                    else:
+                        # Peer is responsive again
+                        if peer in self.peer_failure_times:
+                            del self.peer_failure_times[peer]
+                        if peer in self.peer_failure_count:
+                            del self.peer_failure_count[peer]
+        
+        # Remove dead peers
+        for peer in peers_to_remove:
+            if peer in self.peer_addresses:
+                self.peer_addresses.remove(peer)
+            if peer in self.peer_stubs:
+                del self.peer_stubs[peer]
+            if peer in self.peer_channels:
+                del self.peer_channels[peer]
+            if peer in self.peer_failure_times:
+                del self.peer_failure_times[peer]
+            if peer in self.peer_failure_count:
+                del self.peer_failure_count[peer]
+        
+        # If we removed any peers, save metadata
+        if peers_to_remove:
+            self.save_metadata()
+        
+        return len(peers_to_remove)
+
+    def load_metadata(self):
+        """Load metadata including peer list from disk"""
+        try:
+            if os.path.exists(self.metadata_file):
+                with open(self.metadata_file, 'r') as f:
+                    metadata = json.load(f)
+                    
+                    # Get stored peer list, but prioritize command line arguments
+                    stored_peers = metadata.get("peer_addresses", [])
+                    
+                    # If we have initial_peer_addresses from command line args, use them instead
+                    if hasattr(self, 'initial_peer_addresses') and self.initial_peer_addresses:
+                        self.peer_addresses = self.initial_peer_addresses.copy()
+                        # Only add additional stored peers that aren't already in our list
+                        for peer in stored_peers:
+                            if peer not in self.peer_addresses:
+                                self.peer_addresses.append(peer)
+                    else:
+                        # Otherwise use stored peers
+                        self.peer_addresses = stored_peers
+                        
+                    # Store node ID from metadata if available
+                    if "node_id" in metadata:
+                        self.node_id = metadata["node_id"]
+                    
+                    logging.info(f"Loaded metadata with {len(self.peer_addresses)} peers")
+                    
+                    # Mark all loaded peers as potentially inactive until verified
+                    self.pending_verification_peers = set(self.peer_addresses.copy())
+                    return True
+        except Exception as e:
+            logging.error(f"Error loading metadata: {e}")
+        
+        # If we get here, either no metadata file exists or there was an error
+        # Save current state as new metadata
+        self.save_metadata()
+        return False
+
+    def save_metadata(self):
+        """Save metadata including peer list to disk"""
+        try:
+            metadata = {
+                "peer_addresses": self.peer_addresses,
+                "node_id": self.node_id,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            with open(self.metadata_file, 'w') as f:
+                json.dump(metadata, f, default=str)
+            
+            logging.debug(f"Saved metadata with {len(self.peer_addresses)} peers")
+            return True
+        except Exception as e:
+            logging.error(f"Error saving metadata: {e}")
+            return False
+
+    def add_peer(self, peer_address):
+        """Add a new peer to the cluster"""
+        with self.lock:
+            # Check if peer already exists
+            if peer_address in self.peer_addresses:
+                return False
+            
+            # Don't add ourselves as a peer
+            if peer_address == f"localhost:{self.node_id}":
+                return False
+                
+            # Add to peer list
+            self.peer_addresses.append(peer_address)
+            
+            # Create channel to new peer
+            try:
+                self.peer_channels[peer_address] = grpc.insecure_channel(
+                    peer_address,
+                    options=[
+                        ('grpc.keepalive_time_ms', 10000),
+                        ('grpc.keepalive_timeout_ms', 5000),
+                        ('grpc.keepalive_permit_without_calls', True),
+                        ('grpc.http2.max_pings_without_data', 0),
+                    ]
+                )
+                self.peer_stubs[peer_address] = replication_pb2_grpc.ReplicationServiceStub(self.peer_channels[peer_address])
+                logging.info(f"Added new peer {peer_address} to cluster")
+                
+                # Save updated peer list
+                self.save_metadata()
+                return True
+            except Exception as e:
+                logging.error(f"Error creating channel to new peer {peer_address}: {e}")
+                # Remove from list since we couldn't connect
+                self.peer_addresses.remove(peer_address)
+                return False
+
     def load_log_from_disk(self):
         """Load the persistent log from disk (if it exists)."""
         if os.path.exists(self.storage_file):
@@ -251,9 +457,34 @@ class ReplicatedStore:
         return state
 
     def quorum_size(self):
-        """Compute the required quorum size (including self)."""
-        total_nodes = len(self.peer_addresses) + 1
-        return total_nodes // 2 + 1
+        """
+        Compute the required quorum size (including self) based on ACTIVE servers.
+        Servers that haven't responded recently are excluded from the calculation.
+        """
+        current_time = time.time()
+        
+        # First prune any dead peers
+        self.prune_dead_peers()
+        
+        # Count active peers (those not in failure_times or with recent activity)
+        active_peers = 0
+        
+        for peer in self.peer_addresses:
+            # If peer isn't in failure list or the failure was detected a long time ago (might be back online)
+            if peer not in self.peer_failure_times:
+                active_peers += 1
+        
+        # Total active nodes is active peers plus self
+        total_active_nodes = active_peers + 1
+        
+        # Calculate minimum needed for quorum (majority of active nodes)
+        quorum = total_active_nodes // 2 + 1
+        
+        logging.info(f"Quorum calculation: {quorum} of {total_active_nodes} active nodes (from {len(self.peer_addresses) + 1} total)")
+        
+        # Ensure minimum quorum of 2 (self + at least one peer)
+        # This ensures system can make progress with just 2 nodes
+        return max(2, quorum)
 
     def send_append_entry(self, peer, entry):
         """Send an AppendEntry RPC to a peer."""
@@ -372,6 +603,9 @@ class ReplicatedStore:
         """Trigger an election: become candidate, increment term, and request votes."""
         logging.info("Starting election")
         
+        # Prune dead peers before election
+        self.prune_dead_peers()
+        
         # Refresh connections to peers before election
         self.refresh_peer_connections()
         
@@ -385,6 +619,10 @@ class ReplicatedStore:
             logging.info(f"Node {self.node_id} starting election for term {current_term}")
         
         logging.info("Soliciting votes")
+        
+        # Track active and unreachable peers for better logging
+        active_peers = []
+        unreachable_peers = []
         
         # Gather votes from peers
         for peer in self.peer_addresses:
@@ -401,6 +639,9 @@ class ReplicatedStore:
                 req = replication_pb2.RequestVoteRequest(term=current_term, candidate_id=self.node_id)
                 response = stub.RequestVote(req, timeout=5)
                 
+                # Successfully contacted this peer, so it's active
+                active_peers.append(peer)
+                
                 if response.vote_granted:
                     vote_count += 1
                     logging.info(f"Received vote from {peer} for term {current_term}")
@@ -415,16 +656,35 @@ class ReplicatedStore:
                     else:
                         logging.info(f"Vote denied by {peer} for term {current_term}, their term: {response.term}")
             except grpc.RpcError as e:
+                # Track unreachable peers
+                unreachable_peers.append(peer)
+                
+                # Update peer failure tracking
+                current_time = time.time()
+                self.peer_failure_times[peer] = current_time
+                
                 if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
                     logging.warning(f"Timeout requesting vote from {peer}")
                 else:
                     logging.error(f"gRPC error requesting vote from {peer}: {e.code()}: {e.details()}")
             except Exception as e:
+                # Track unreachable peers
+                unreachable_peers.append(peer)
+                
+                # Update peer failure tracking
+                current_time = time.time()
+                self.peer_failure_times[peer] = current_time
+                
                 logging.error(f"Error sending RequestVote to {peer}: {e}")
         
-        # Determine election outcome
+        # Use the updated quorum size that considers only active peers
         quorum = self.quorum_size()
+        
+        # More detailed logging about the active cluster state
+        total_active = len(active_peers) + 1  # active peers + self
+        logging.info(f"Election status: {total_active} active nodes, {len(unreachable_peers)} unreachable nodes")
         logging.info(f"Election results: received {vote_count} votes out of {len(self.peer_addresses) + 1} total nodes")
+        logging.info(f"Required quorum: {quorum} votes (based on active nodes)")
         
         with self.lock:
             if vote_count >= quorum:
@@ -448,7 +708,7 @@ class ReplicatedStore:
                 self.is_leader = False
         
         logging.info("Election complete")
-        
+                        
     def send_heartbeats(self):
         """Send heartbeat messages (via AppendEntry RPC with a 'heartbeat' entry) to all peers."""
         heartbeat_entry = {
@@ -527,7 +787,7 @@ class ReplicatedStore:
             logging.info(f"Sent heartbeats to {success_count} peers")
         else:
             logging.warning("Failed to send heartbeats to any peers")
-                                    
+                                        
     def election_daemon(self):
         """
         Background thread that monitors heartbeats and triggers elections when needed.
@@ -538,10 +798,11 @@ class ReplicatedStore:
         HEARTBEAT_INTERVAL = 2    # seconds between leader heartbeats
         # Newly started servers wait longer before disrupting
         INITIAL_STARTUP_TIMEOUT = 15  # seconds to wait on startup before first election
-        # Leaders get some stability - require multiple missed heartbeats before step down
-        LEADER_STABILITY_FACTOR = 2  # Leaders need longer timeout before stepping down
+        # Periodically prune dead peers
+        PEER_CLEANUP_INTERVAL = 20  # seconds between peer list cleanups
         
         last_heartbeat_time = time.time()
+        last_peer_cleanup_time = time.time()
         
         # Each server should get a consistent but unique random seed based on its ID
         # This ensures election timeouts are different between servers
@@ -553,6 +814,13 @@ class ReplicatedStore:
                 
                 with self.lock:
                     current_time = time.time()
+                    
+                    # Periodically clean up dead peers
+                    if current_time - last_peer_cleanup_time > PEER_CLEANUP_INTERVAL:
+                        removed_count = self.prune_dead_peers()
+                        if removed_count > 0:
+                            logging.info(f"Peer cleanup: removed {removed_count} unresponsive peers")
+                        last_peer_cleanup_time = current_time
                     
                     # If in initial startup phase, use extended timeout
                     if hasattr(self, 'initial_startup') and self.initial_startup:
@@ -628,7 +896,7 @@ class ReplicatedStore:
                                 self.lock.acquire()
             except Exception as e:
                 logging.error(f"Error in election daemon: {e}")
-                                                
+                                                                                
 # -------------------------------
 # Replication Service
 # -------------------------------
@@ -639,6 +907,22 @@ class ReplicationServicer(replication_pb2_grpc.ReplicationServiceServicer):
     """
     def __init__(self, rep_store: ReplicatedStore):
         self.rep_store = rep_store
+
+    def AnnounceNode(self, request, context):
+        """Handle announcement from a new server joining the cluster"""
+        node_id = request.node_id
+        replication_address = request.replication_address
+        
+        logging.info(f"Received announcement from node {node_id} at {replication_address}")
+        
+        # Add the new peer to our list
+        success = self.rep_store.add_peer(replication_address)
+        
+        # Return our current peer list to help the new node discover other peers
+        return replication_pb2.AnnounceResponse(
+            success=success,
+            peer_addresses=self.rep_store.peer_addresses
+        )
 
     def AppendEntry(self, request, context):
         try:
@@ -1067,6 +1351,23 @@ class ChatServicer(chat_pb2_grpc.ChatServiceServicer):
         )
         
     def ListAccounts(self, request, context):
+        # Check for server discovery metadata
+        discovery_requested = False
+        for key, value in context.invocation_metadata():
+            if key == 'discover_servers' and value.lower() == 'true':
+                discovery_requested = True
+                break
+                
+        # If this is a server discovery request, add server list metadata
+        if discovery_requested:
+            # Add metadata about known servers
+            try:
+                # Get all known replication addresses
+                server_list = json.dumps(self.rep_store.peer_addresses)
+                context.set_trailing_metadata([('known_servers', server_list)])
+            except Exception as e:
+                logging.error(f"Error providing server list metadata: {e}")
+        
         # For the basic connectivity check with pattern="*", we don't need authentication
         if request.pattern == '*' and not any(metadata for metadata in context.invocation_metadata()):
             # This is likely a connectivity check from the client

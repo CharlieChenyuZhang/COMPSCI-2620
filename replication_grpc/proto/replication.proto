@@ -4,8 +4,22 @@ package replication;
 
 // RPC for replicating log entries (and heartbeat messages)
 service ReplicationService {
-  rpc AppendEntry(AppendEntryRequest) returns (AppendEntryResponse);
-  rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
+  // Existing RPC methods
+  rpc AppendEntry (AppendEntryRequest) returns (AppendEntryResponse);
+  rpc RequestVote (RequestVoteRequest) returns (RequestVoteResponse);
+  
+  // New RPC method for server discovery
+  rpc AnnounceNode (AnnounceRequest) returns (AnnounceResponse);
+}
+
+message AnnounceRequest {
+  string node_id = 1;
+  string replication_address = 2;
+}
+
+message AnnounceResponse {
+  bool success = 1;
+  repeated string peer_addresses = 2;
 }
 
 // Message for appending an entry (including heartbeat messages)
