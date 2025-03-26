@@ -23,6 +23,33 @@ This sets the port for the ReplicationService, which is responsible for inter-re
 --peers:
 This parameter lists the addresses (host:port) of peer replicas that this server should communicate with for replication purposes.
 
+(Bonus)
+If you want to add additional servers you can run the following commands (they are added without needing the original 3)
+
+# Server 4
+`python grpc_server.py --port 50081 --replication_port 50082 --peers localhost:50052 localhost:50062 localhost:50072`
+
+# Server 5
+`python grpc_server.py --port 50091 --replication_port 50092 --peers localhost:50052 localhost:50062 localhost:50072 localhost:50082`
+
+# Server 6
+`python grpc_server.py --port 50101 --replication_port 50102 --peers localhost:50052 localhost:50062 localhost:50072 localhost:50082 localhost:50092`
+
+# Server 7
+`python grpc_server.py --port 50111 --replication_port 50112 --peers localhost:50052 localhost:50062 localhost:50072 localhost:50082 localhost:50092 localhost:50102`
+
+# Server 8
+`python grpc_server.py --port 50121 --replication_port 50122 --peers localhost:50052 localhost:50062 localhost:50072 localhost:50082 localhost:50092 localhost:50102 localhost:50112`
+
+# Server 9
+`python grpc_server.py --port 50131 --replication_port 50132 --peers localhost:50052 localhost:50062 localhost:50072 localhost:50082 localhost:50092 localhost:50102 localhost:50112 localhost:50122`
+
+# Server 10
+`python grpc_server.py --port 50141 --replication_port 50142 --peers localhost:50052 localhost:50062 localhost:50072 localhost:50082 localhost:50092 localhost:50102 localhost:50112 localhost:50122 localhost:50132`
+
+# Server 11
+`python grpc_server.py --port 50151 --replication_port 50152 --peers localhost:50052 localhost:50062 localhost:50072 localhost:50082 localhost:50092 localhost:50102 localhost:50112 localhost:50122 localhost:50132 localhost:50142`
+
 ### 5-server exampel
 
 Leader (Server 1):
