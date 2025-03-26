@@ -15,6 +15,7 @@ message AppendEntryRequest {
 
 message AppendEntryResponse {
   bool success = 1;
+  int32 term = 2;
 }
 
 // Message for requesting a vote during leader election
